@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MODO MATE — Propuesta de Servicios Web</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #1E2521;
+      background: #fff;
+      line-height: 1.6;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @page {
+      margin: 15mm 18mm;
+      size: A4;
+    }
+
+    .page {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 0;
+    }
+
+    .page+.page {
+      page-break-before: always;
+      border-top: none;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 3px solid #2C5E43;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 900;
+      color: #2C5E43;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .header .subtitle {
+      font-size: 11px;
+      color: #C29F58;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    .header .doc-title {
+      margin-top: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #555;
+    }
+
+    /* Sections */
+    h2 {
+      font-size: 18px;
+      font-weight: 900;
+      color: #2C5E43;
+      margin: 30px 0 15px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e8e3d9;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1E2521;
+      margin: 20px 0 8px;
+    }
+
+    p,
+    li {
+      font-size: 12.5px;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    .highlight {
+      background: #f0faf4;
+      border-left: 4px solid #2C5E43;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 15px 0;
+    }
+
+    .highlight p {
+      margin: 0;
+      font-size: 12px;
+      color: #2C5E43;
+    }
+
+    .highlight strong {
+      color: #1E2521;
+    }
+
+    /* Service cards */
+    .service-card {
+      background: #faf9f5;
+      border: 1px solid #e8e3d9;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 12px 0;
+    }
+
+    .service-card h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .service-card .price {
+      font-size: 13px;
+      font-weight: 900;
+      color: #2C5E43;
+      float: right;
+    }
+
+    .service-card p {
+      font-size: 12px;
+      margin: 0;
+      color: #666;
+    }
+
+    /* Cost table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 12.5px;
+    }
+
+    thead th {
+      background: #2C5E43;
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    thead th:last-child {
+      text-align: right;
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8e3d9;
+    }
+
+    tbody td:last-child {
+      text-align: right;
+      font-weight: 700;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .total-row td {
+      background: #f0faf4;
+      font-weight: 900 !important;
+      font-size: 14px;
+      color: #2C5E43;
+      border-top: 2px solid #2C5E43;
+    }
+
+    /* MP section */
+    .mp-table th {
+      background: #3483FA;
+    }
+
+    /* Footer */
+    .doc-footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e8e3d9;
+      font-size: 10px;
+      color: #999;
+    }
+
+    @media print {
+      .page {
+        padding: 0;
+      }
+
+      .no-print {
+        display: none;
+      }
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #2C5E43;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(44, 94, 67, 0.3);
+      z-index: 100;
+    }
+
+    .print-btn:hover {
+      background: #1E4A33;
+    }
+  </style>
+</head>
+
+<body>
+
+  <button class="print-btn no-print" onclick="window.print()">📄 Guardar como PDF</button>
+
+  <!-- ==================== PÁGINA 1 ==================== -->
+  <div class="page">
+    <div class="header">
+      <h1>MODO MATE</h1>
+      <div class="subtitle">y otras yerbas</div>
+      <div class="doc-title">Propuesta de Servicios para Tienda Online</div>
+    </div>
+
+    <h2>¿Qué necesita tu tienda online para funcionar?</h2>
+
+    <p>Una tienda online es como un local físico: necesita un lugar donde estar, un sistema para guardar la información
+      y una forma de cobrarle a los clientes. En internet, eso se traduce en <strong>4 servicios esenciales</strong>:
+    </p>
+
+    <div class="service-card">
+      <h3>🌐 Dominio <span class="price">~$8.500 ARS/año</span></h3>
+      <p>Es la <strong>dirección de tu tienda en internet</strong>. Así como tu local tiene una dirección en la calle
+        (J.M. Bullo 1275), tu tienda online tiene una dirección web: <strong>modomate.com.ar</strong>. Cuando alguien
+        escribe eso en el navegador, llega a tu página. Se paga una vez al año y se registra en NIC Argentina con tu
+        CUIT.</p>
+    </div>
+
+    <div class="service-card">
+      <h3>🖥️ Servidor Web <span class="price">GRATIS</span></h3>
+      <p>Es el lugar donde <strong>"vive" tu página web</strong>. Pensalo como el estante donde están exhibidos tus
+        productos para que la gente los vea. Usamos <strong>Cloudflare Pages</strong>, un servicio gratuito de una
+        empresa internacional que hace que tu página cargue rápido desde cualquier parte del país. Puede aguantar que
+        entren cientos de personas al mismo tiempo sin caerse.</p>
+    </div>
+
+    <div class="service-card">
+      <h3>⚙️ Servidor de Lógica <span class="price">$7 USD/mes</span></h3>
+      <p>Es el <strong>"cerebro" de tu tienda</strong>. Es el que procesa los pedidos, actualiza el stock cuando alguien
+        compra, maneja los datos de los clientes y se comunica con Mercado Pago para cobrar. Está prendido las 24 horas,
+        los 7 días de la semana. Usamos <strong>Render</strong>, una plataforma confiable que no se cae.</p>
+    </div>
+
+    <div class="service-card">
+      <h3>🗄️ Base de Datos <span class="price">$25 USD/mes</span></h3>
+      <p>Es el <strong>"archivo" donde se guarda todo</strong>: los productos con sus precios y fotos, los pedidos de
+        los clientes, el historial de ventas, las cantidades en stock. Usamos <strong>Supabase</strong>, que incluye
+        <strong>backups automáticos todos los días</strong> — si alguna vez pasa algo, se puede recuperar toda la
+        información.</p>
+    </div>
+
+    <div class="highlight">
+      <p>🔒 <strong>Certificado de Seguridad (SSL)</strong> — El "candadito" que aparece en el navegador y le dice a tus
+        clientes que la página es segura. <strong>Viene incluido gratis</strong> con el servidor web.</p>
+    </div>
+  </div>
+
+  <!-- ==================== PÁGINA 2 ==================== -->
+  <div class="page">
+    <h2>¿Cuánto se paga por mes?</h2>
+
+    <p>Estos son los costos fijos mensuales para mantener la tienda funcionando:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Servicio</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🌐 Dominio modomate.com.ar</td>
+          <td>~$708 ARS/mes</td>
+        </tr>
+        <tr>
+          <td>🖥️ Servidor Web (Cloudflare)</td>
+          <td>GRATIS</td>
+        </tr>
+        <tr>
+          <td>⚙️ Servidor de Lógica (Render)</td>
+          <td>$7 USD (~$10.500 ARS)</td>
+        </tr>
+        <tr>
+          <td>🗄️ Base de Datos (Supabase)</td>
+          <td>$25 USD (~$37.500 ARS)</td>
+        </tr>
+        <tr>
+          <td>🔒 SSL (Seguridad)</td>
+          <td>GRATIS</td>
+        </tr>
+        <tr class="total-row">
+          <td>TOTAL MENSUAL</td>
+          <td>~$30 USD (~$48.700 ARS)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight">
+      <p>💡 Todos estos servicios quedan <strong>a nombre del dueño de MODO MATE</strong>, con su email y su tarjeta. No
+        dependés de ningún tercero para mantener tu tienda funcionando.</p>
+    </div>
+
+    <h2>💳 Mercado Pago — ¿Cuánto cobra?</h2>
+
+    <p><strong>Mercado Pago no cobra mensualidad.</strong> Es gratis tenerlo instalado. Solo cobra un porcentaje chico
+      por cada venta que se realice. Ese porcentaje se descuenta automáticamente de lo que cobrás:</p>
+
+    <table class="mp-table">
+      <thead>
+        <tr>
+          <th>Cómo paga el cliente</th>
+          <th>Comisión aprox.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tarjeta de Crédito</td>
+          <td>~2.5% a 7.5%</td>
+        </tr>
+        <tr>
+          <td>Tarjeta de Débito</td>
+          <td>~2% a 4.5%</td>
+        </tr>
+        <tr>
+          <td>Transferencia / Efectivo</td>
+          <td>~2% a 4%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 11px; color: #888;">El porcentaje exacto depende de cuánto tardes en recibir la plata: si la
+      querés al instante es más alto, si esperás 30 días es más bajo. Se configura desde tu cuenta de Mercado Pago.</p>
+
+    <h3>Ejemplo concreto:</h3>
+    <p>Si vendés un mate de <strong>$25.000</strong> y el cliente paga con tarjeta de crédito con acreditación en 30
+      días (~2.5%):</p>
+    <ul>
+      <li>Mercado Pago se queda con ~$625</li>
+      <li><strong>Vos recibís ~$24.375</strong></li>
+    </ul>
+  </div>
+
+  <!-- ==================== PÁGINA 3 ==================== -->
+  <div class="page">
+    <h2>¿Qué incluye tu tienda online?</h2>
+
+    <h3>Para tus clientes:</h3>
+    <ul>
+      <li>Catálogo completo de productos con fotos, precios y descripción</li>
+      <li>Filtros por categoría (Mates, Termos, Yerbas, Hierbas, Accesorios)</li>
+      <li>Buscador de productos</li>
+      <li>Carrito de compras con cálculo de envío por código postal</li>
+      <li>Pago con tarjeta de crédito/débito, transferencia, efectivo y Mercado Pago</li>
+      <li>Cuotas sin interés (configurable)</li>
+      <li>Confirmación de pedido por pantalla</li>
+      <li>Página de Inicio con la historia de MODO MATE, Instagram y ubicación del local</li>
+    </ul>
+
+    <h3>Para vos (Panel de Administración):</h3>
+    <ul>
+      <li>Agregar, editar y eliminar productos desde el panel (sin tocar código)</li>
+      <li>Ver todos los pedidos recibidos con detalle del cliente y productos comprados</li>
+      <li>Cambiar el estado de los pedidos (Pendiente → Preparando → Despachado → Completado)</li>
+      <li>Ver estadísticas de facturación y stock</li>
+      <li>Alerta de productos con poco stock</li>
+    </ul>
+
+    <h3>Técnico (lo que hace que todo funcione):</h3>
+    <ul>
+      <li>Diseño profesional adaptado a celulares, tablets y computadoras</li>
+      <li>Carga rápida desde cualquier punto de Argentina</li>
+      <li>Backups automáticos diarios de toda tu información</li>
+      <li>Conexión segura (SSL/HTTPS)</li>
+      <li>Integración real con Mercado Pago</li>
+    </ul>
+
+    <h2>Resumen</h2>
+
+    <div class="highlight">
+      <p>Tu tienda online cuesta aproximadamente <strong>$30 USD por mes (~$48.700 ARS)</strong> para mantener. Eso
+        incluye todo lo necesario para que funcione 24/7 sin caerse: servidor, base de datos, dominio y seguridad.
+        Mercado Pago no tiene costo mensual, solo cobra un porcentaje chico de cada venta.</p>
+    </div>
+
+    <div class="doc-footer">
+      <p><strong>MODO MATE</strong> — y otras yerbas</p>
+      <p>J.M. Bullo 1275, San Cristóbal, Santa Fe</p>
+      <p>@modo__mate · modomate.com.ar</p>
+      <p style="margin-top: 8px;">Documento generado en Julio 2026. Los precios son estimativos y pueden variar.</p>
+    </div>
+  </div>
+
+</body>
+
+</html>

@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green-dark: #2C5E43;
+  --color-brand-green: #3A7555;
+  --color-brand-green-light: #E8F0EA;
+  --color-brand-arena: #F7F5F0;
+  --color-brand-gold: #C29F58;
+  --color-brand-gold-dark: #A68444;
+  --color-brand-dark: #1E2521;
+  --color-brand-gray: #7E8B83;
+}
+
+:root {
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Transiciones globales suaves para botones y enlaces */
+button, a, input, select {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estilo para simular Mercado Pago (efecto de carga o modal) */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Quitar flechas del input number de código postal */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* --- NUEVAS MEJORAS DE DISEÑO PREMIUM --- */
+
+/* Hover Lift + Green Glow (Inspirado en PlatinoGear) */
+.hover-lift-glow {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              border-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.hover-lift-glow:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 38px -10px rgba(44, 94, 67, 0.22), 
+              0 0 20px 2px rgba(194, 159, 88, 0.12);
+  border-color: rgba(58, 117, 85, 0.35);
+}
+
+/* Línea de Acento Decorativa en Títulos */
+.section-title-accent {
+  position: relative;
+  padding-bottom: 12px;
+}
+.section-title-accent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #2C5E43, #C29F58);
+  border-radius: 3px;
+  box-shadow: 0 1px 6px rgba(44, 94, 67, 0.25);
+}
+
+/* Para títulos centrados */
+.section-title-accent-center {
+  position: relative;
+  padding-bottom: 12px;
+}
+.section-title-accent-center::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #2C5E43, #C29F58);
+  border-radius: 3px;
+  box-shadow: 0 1px 6px rgba(44, 94, 67, 0.25);
+}
+
+/* Grilla Circular de Categorías */
+.category-circle-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+.category-circle-btn .circle-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid #E8F0EA;
+  background-color: white;
+  color: #3A7555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+.category-circle-btn:hover .circle-icon-wrapper {
+  transform: translateY(-4px);
+  border-color: #C29F58;
+  background-color: #E8F0EA;
+  box-shadow: 0 8px 18px -6px rgba(44, 94, 67, 0.25);
+}
+.category-circle-btn.active .circle-icon-wrapper {
+  background-color: #2C5E43;
+  color: white;
+  border-color: #C29F58;
+  box-shadow: 0 8px 18px -4px rgba(44, 94, 67, 0.35);
+}
+.category-circle-btn .circle-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #7E8B83;
+  transition: color 0.2s;
+}
+.category-circle-btn:hover .circle-label,
+.category-circle-btn.active .circle-label {
+  color: #1E2521;
+}
+
