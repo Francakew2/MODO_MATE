@@ -104,6 +104,27 @@ function App() {
     }
   };
 
+  // --- Cargar Pedidos si el usuario es Administrador ---
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (userRole === 'admin' && session?.access_token) {
+        try {
+          const response = await fetch(`${API_URL}/api/orders/admin`, {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          });
+          if (!response.ok) throw new Error('Error al obtener pedidos de administrador');
+          const data = await response.json();
+          setOrders(data);
+        } catch (err) {
+          console.error('[API] Error al cargar pedidos:', err.message);
+        }
+      }
+    };
+    fetchOrders();
+  }, [userRole, session]);
+
   // --- Sincronización LocalStorage ---
   useEffect(() => {
     localStorage.setItem('mm_cart', JSON.stringify(cartItems));
