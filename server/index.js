@@ -5,11 +5,12 @@ require('dotenv').config();
 
 const app = express();
 
-// Configuración de CORS para permitir solicitudes del frontend
 const allowedOrigins = [
   'http://localhost:5173', // Entorno de desarrollo local
   'https://modo-mate.pages.dev', // URL del hosting definitivo en Cloudflare
-  'https://modo-mate.franciscochaulet011.workers.dev' // URL actual temporal
+  'https://modo-mate.franciscochaulet011.workers.dev', // URL actual temporal
+  'https://modomate1.com.ar', // Dominio de producción oficial
+  'https://www.modomate1.com.ar' // Dominio de producción con www
 ];
 
 app.use(cors({
