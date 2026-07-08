@@ -1,6 +1,6 @@
 import React from 'react';
 import Logo from './Logo';
-import { ShoppingCart, Search, UserCheck, ShieldAlert, Store, Home } from 'lucide-react';
+import { ShoppingCart, Search, UserCheck, ShieldAlert, Store, Home, User } from 'lucide-react';
 
 export default function Navbar({
   currentPage,
@@ -20,7 +20,7 @@ export default function Navbar({
     <header className="sticky top-0 z-40 w-full bg-brand-green-dark text-white shadow-md">
       {/* Top Banner (Info/Promociones) */}
       <div className="bg-brand-gold text-brand-dark text-xs font-bold text-center py-1.5 px-4 tracking-wider uppercase">
-        🌿 ¡10% de descuento abonando por transferencia o efectivo! • Envío gratis superando los $75.000
+        🌿 ¡10% de descuento abonando por transferencia o efectivo! • Envío gratis superando los $95.000
       </div>
 
       {/* Main Navbar */}
@@ -58,27 +58,40 @@ export default function Navbar({
           {/* Navegación Principal: Inicio */}
           <button
             onClick={() => { setCurrentPage('home'); setCurrentTab('shop'); }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
               currentPage === 'home' 
-                ? 'bg-white/15 text-white' 
-                : 'text-white/80 hover:text-white hover:bg-white/5'
+                ? 'bg-white/20 text-brand-gold shadow-sm' 
+                : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
             }`}
           >
-            <Home className="w-4 h-4" />
-            <span className="hidden xs:inline">Inicio</span>
+            <Home className="w-4 h-4 shrink-0" />
+            <span className="inline">Inicio</span>
           </button>
 
           {/* Navegación Principal: Productos */}
           <button
             onClick={() => { setCurrentPage('productos'); setCurrentTab('shop'); }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              currentPage === 'productos' 
-                ? 'bg-white/15 text-white' 
-                : 'text-white/80 hover:text-white hover:bg-white/5'
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
+              currentPage === 'productos' && currentTab !== 'admin'
+                ? 'bg-white/20 text-brand-gold shadow-sm' 
+                : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
             }`}
           >
-            <Store className="w-4 h-4" />
-            <span className="hidden xs:inline">Productos</span>
+            <Store className="w-4 h-4 shrink-0" />
+            <span className="inline">Productos</span>
+          </button>
+
+          {/* Navegación Principal: Contacto */}
+          <button
+            onClick={() => { setCurrentPage('contacto'); setCurrentTab('shop'); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
+              currentPage === 'contacto' 
+                ? 'bg-white/20 text-brand-gold shadow-sm' 
+                : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
+            }`}
+          >
+            <User className="w-4 h-4 shrink-0" />
+            <span className="inline">Contacto</span>
           </button>
 
           {/* Autenticación Real de Supabase */}

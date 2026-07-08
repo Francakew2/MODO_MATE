@@ -11,8 +11,8 @@ export default function Logo({ className = "w-16 h-16" }) {
       
       {/* Rutas ocultas para las curvas de texto */}
       <path id="curveTop" d="M 30 100 A 70 70 0 0 1 170 100" fill="none" stroke="none" />
-      {/* Nota: la curva inferior va de derecha a izquierda para que el texto quede al derecho de izquierda a derecha */}
-      <path id="curveBottom" d="M 170 105 A 70 70 0 0 1 30 105" fill="none" stroke="none" />
+      {/* Nota: la curva inferior ahora va de izquierda a derecha (sweep-flag 0) para que las letras queden al derecho y se lean de izquierda a derecha */}
+      <path id="curveBottom" d="M 30 105 A 70 70 0 0 0 170 105" fill="none" stroke="none" />
       
       {/* Texto MODO (Arriba) */}
       <text className="font-sans font-black fill-black text-[22px] tracking-[0.25em]">

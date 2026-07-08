@@ -6,7 +6,7 @@ import ProductCard from './components/ProductCard';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import AdminPanel from './components/AdminPanel';
-import { ArrowLeft, Check, Sparkles, Heart, Info, ArrowRight, Truck, CreditCard, Phone, MapPin, LayoutGrid, Leaf, Sprout, Clock, ExternalLink, Store } from 'lucide-react';
+import { ArrowLeft, Check, Sparkles, Heart, Info, ArrowRight, Truck, CreditCard, Phone, MapPin, LayoutGrid, Leaf, Sprout, Clock, ExternalLink, Store, Mail, Send } from 'lucide-react';
 import Logo from './components/Logo';
 import { supabase } from './lib/supabase';
 
@@ -30,11 +30,15 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'productos'
+  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'productos' | 'contacto'
   const [currentTab, setCurrentTab] = useState('shop'); // 'shop' | 'product-detail'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('Todos');
+
+  // Contacto Form States
+  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [isSendingContact, setIsSendingContact] = useState(false);
 
   // Modales
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -393,6 +397,28 @@ function App() {
     } catch (err) {
       console.error('Error uploading image to Supabase:', err);
       throw new Error('No se pudo subir la imagen. Verifica que el bucket "products" esté creado como público en Supabase.');
+    }
+  };
+
+  // --- Handler para el Formulario de Contacto ---
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      alert('Por favor, completa los campos obligatorios.');
+      return;
+    }
+
+    try {
+      setIsSendingContact(true);
+      // Simular retraso de red
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      alert(`¡Gracias por tu mensaje, ${contactForm.name}! Nos comunicaremos con vos a la brevedad por WhatsApp o correo electrónico.`);
+      setContactForm({ name: '', email: '', phone: '', message: '' });
+    } catch (err) {
+      alert('Ocurrió un error al enviar el mensaje. Por favor, intenta de nuevo.');
+    } finally {
+      setIsSendingContact(false);
     }
   };
 
@@ -1092,6 +1118,162 @@ function App() {
             </div>
           )}
           </>
+          )}
+
+          {/* ================================================================ */}
+          {/* PÁGINA: CONTACTO                                                 */}
+          {/* ================================================================ */}
+          {currentPage === 'contacto' && (
+            <div className="animate-fade-in flex-1 bg-brand-arena/10 py-12 px-4 sm:px-6 lg:px-8">
+              <div className="max-w-7xl mx-auto space-y-12">
+                
+                {/* Cabecera Minimalista */}
+                <div className="text-center max-w-xl mx-auto space-y-4">
+                  <span className="inline-flex items-center gap-1 bg-brand-green/10 text-brand-green-dark px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                    <Mail className="w-3.5 h-3.5 text-brand-gold" />
+                    <span>Contacto</span>
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl font-black tracking-widest text-brand-dark uppercase">Ponte en Contacto</h2>
+                  <p className="text-sm text-brand-gray font-medium leading-relaxed">
+                    ¿Tenés alguna duda, consulta o querés realizar un pedido especial? Escribinos y te responderemos lo antes posible.
+                  </p>
+                </div>
+
+                {/* Formulario y Tarjeta de Detalles */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  
+                  {/* Bloque Formulario */}
+                  <div className="bg-white p-6 sm:p-8 border border-brand-arena shadow-xs space-y-6">
+                    <h3 className="text-lg font-bold text-brand-dark uppercase tracking-wider border-b border-brand-arena pb-3">Envianos un mensaje</h3>
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      <div className="space-y-1">
+                        <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider">Nombre Completo *</label>
+                        <input
+                          type="text"
+                          required
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Juan Pérez"
+                          className="w-full bg-white border border-brand-arena px-4 py-2.5 focus:outline-none focus:border-brand-green text-sm text-brand-dark transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider">Correo Electrónico *</label>
+                        <input
+                          type="email"
+                          required
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="juan@email.com"
+                          className="w-full bg-white border border-brand-arena px-4 py-2.5 focus:outline-none focus:border-brand-green text-sm text-brand-dark transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider">Teléfono / WhatsApp</label>
+                        <input
+                          type="text"
+                          value={contactForm.phone}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                          placeholder="3408 67-1408"
+                          className="w-full bg-white border border-brand-arena px-4 py-2.5 focus:outline-none focus:border-brand-green text-sm text-brand-dark transition-all"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider">Mensaje *</label>
+                        <textarea
+                          required
+                          rows="4"
+                          value={contactForm.message}
+                          onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                          placeholder="Hola, me gustaría saber si tienen stock de..."
+                          className="w-full bg-white border border-brand-arena px-4 py-2.5 focus:outline-none focus:border-brand-green text-sm text-brand-dark transition-all resize-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSendingContact}
+                        className="w-full bg-brand-green-dark text-white hover:bg-brand-green font-bold text-xs uppercase tracking-widest py-3.5 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Send className="w-4 h-4" />
+                        <span>{isSendingContact ? 'Enviando...' : 'Enviar Mensaje'}</span>
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Bloque Información de Contacto */}
+                  <div className="space-y-6">
+                    
+                    {/* Tarjeta de Canales */}
+                    <div className="bg-white p-6 sm:p-8 border border-brand-arena shadow-xs space-y-6">
+                      <h3 className="text-lg font-bold text-brand-dark uppercase tracking-wider border-b border-brand-arena pb-3">Nuestros Canales</h3>
+                      
+                      <div className="space-y-4">
+                        {/* WhatsApp */}
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center text-[#25D366] shrink-0">
+                            <Phone className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">WhatsApp Directo</p>
+                            <p className="text-sm font-semibold text-brand-dark">+54 9 3408 67-1408</p>
+                            <a
+                              href="https://wa.me/5493408671408"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-[#25D366] font-bold hover:underline"
+                            >
+                              <span>Chatear ahora</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+
+                        {/* Local Físico */}
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green-dark shrink-0">
+                            <MapPin className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">Local Físico</p>
+                            <p className="text-sm font-semibold text-brand-dark">J.M. Bullo 1275, San Cristóbal, Santa Fe</p>
+                          </div>
+                        </div>
+
+                        {/* Horarios */}
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold shrink-0">
+                            <Clock className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">Horarios de Atención</p>
+                            <p className="text-sm font-semibold text-brand-dark">Lunes a Viernes: 9:00 - 13:00 / 17:00 - 21:00</p>
+                            <p className="text-sm font-semibold text-brand-dark">Sábados: 9:00 - 13:00</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mapa embebido */}
+                    <div className="bg-white border border-brand-arena overflow-hidden h-72 shadow-xs relative">
+                      <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3434.721469145695!2d-61.1685412!3d-30.3020286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x944a95ef3963fdab%3A0xe9f798e4d3db2529!2sJ.%20M.%20Bullo%201275%2C%20S3040%20San%20Crist%C3%B3bal%2C%20Santa%20Fe!5e0!3m2!1ses-419!2sar!4v1720098000000!5m2!1ses-419!2sar" 
+                        className="w-full h-full border-none"
+                        allowFullScreen="" 
+                        loading="lazy" 
+                        referrerPolicy="no-referrer-when-downgrade"
+                      ></iframe>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
           )}
         </>
       )}

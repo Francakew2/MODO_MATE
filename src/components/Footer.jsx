@@ -38,7 +38,7 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
               </svg>
             </a>
             <a 
-              href="https://wa.me" 
+              href="https://wa.me/5493408671408" 
               target="_blank" 
               rel="noreferrer"
               className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-dark transition-colors"
@@ -116,7 +116,7 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
       <div className="bg-black/20 border-t border-white/5 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-brand-gray text-center sm:text-left">
-            &copy; {new Date().getFullYear()} MODO MATE. Todos los derechos reservados. Maqueta de demostración.
+            &copy; {new Date().getFullYear()} MODO MATE. Todos los derechos reservados. Tienda Oficial Online.
           </p>
           {/* Payment Badges list */}
           <div className="flex flex-wrap justify-center gap-2 text-[10px] font-bold text-brand-gray uppercase tracking-widest">
