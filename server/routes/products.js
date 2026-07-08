@@ -63,7 +63,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios (nombre, precio, categoría).' });
   }
 
-  const finalImageUrl = image_url || image || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80';
+  const finalImageUrl = image || image_url || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80';
 
   try {
     const { data: newProduct, error } = await supabase
@@ -87,7 +87,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 // 4. Actualizar un producto (Solo Admin)
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   const { name, description, price, category, image, image_url, stock, details } = req.body;
-  const finalImageUrl = image_url || image;
+  const finalImageUrl = image || image_url;
 
   try {
     const updateData = { name, description, price, category, stock, details };
