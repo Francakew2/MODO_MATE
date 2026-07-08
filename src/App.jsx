@@ -989,16 +989,29 @@ function App() {
                         onClick={(e) => {
                           e.preventDefault();
                           if (!detailZipCode) return;
-                          if (selectedProduct.price >= 75000) {
+                          if (selectedProduct.price >= 95000) {
                             setDetailShippingCost(0);
                           } else {
                             const code = parseInt(detailZipCode) || 0;
-                            if (code >= 1000 && code <= 1499) {
-                              setDetailShippingCost(3500); // CABA
-                            } else if (code >= 1500 && code <= 1999) {
-                              setDetailShippingCost(5500); // GBA
+                            // A) Santa Fe (Local)
+                            const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
+                            
+                            // B) Regional
+                            const isRegional = 
+                              (code >= 1000 && code <= 1999) || // CABA y GBA
+                              (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
+                              (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
+                              (code >= 3400 && code <= 3499) || // Corrientes
+                              (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
+                              (code >= 5000 && code <= 5999) || // Córdoba y San Luis
+                              (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
+                              
+                            if (isSantaFe) {
+                              setDetailShippingCost(9900); // Provincial (Santa Fe)
+                            } else if (isRegional) {
+                              setDetailShippingCost(11500); // Regional
                             } else {
-                              setDetailShippingCost(7500); // Interior
+                              setDetailShippingCost(13000); // Nacional
                             }
                           }
                           setDetailZipChecked(true);

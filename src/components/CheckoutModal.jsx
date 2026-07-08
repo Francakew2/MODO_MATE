@@ -30,22 +30,31 @@ export default function CheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState('');
 
-  // Auto-calculate shipping based on zip code
+  // Auto-calculate shipping based on selected province
   useEffect(() => {
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    if (subtotal >= 75000) {
+    if (subtotal >= 95000) {
       setShippingCost(0);
     } else {
-      const code = parseInt(formData.zipCode) || 0;
-      if (code >= 1000 && code <= 1499) {
-        setShippingCost(3500); // CABA
-      } else if (code >= 1500 && code <= 1999) {
-        setShippingCost(5500); // GBA
+      const prov = formData.province;
+      if (prov === 'Santa Fe') {
+        setShippingCost(9900); // Provincial
+      } else if (
+        prov === 'CABA' || 
+        prov === 'Buenos Aires' || 
+        prov === 'Córdoba' || 
+        prov === 'Entre Ríos' || 
+        prov === 'Corrientes' || 
+        prov === 'Chaco' || 
+        prov === 'Santiago del Estero' || 
+        prov === 'La Pampa'
+      ) {
+        setShippingCost(11500); // Regional
       } else {
-        setShippingCost(7500); // Interior
+        setShippingCost(13000); // Nacional
       }
     }
-  }, [formData.zipCode, cartItems]);
+  }, [formData.province, cartItems]);
 
   if (!isOpen) return null;
 
@@ -258,11 +267,29 @@ export default function CheckoutModal({
                       className="w-full bg-brand-arena/40 border border-transparent rounded-xl px-3 py-2 text-sm text-brand-dark focus:outline-none focus:border-brand-green focus:bg-white"
                     >
                       <option value="CABA">Capital Federal (CABA)</option>
-                      <option value="Buenos Aires">Provincia de Buenos Aires</option>
-                      <option value="Córdoba">Córdoba</option>
+                      <option value="Buenos Aires">Buenos Aires</option>
                       <option value="Santa Fe">Santa Fe</option>
+                      <option value="Córdoba">Córdoba</option>
+                      <option value="Entre Ríos">Entre Ríos</option>
+                      <option value="Corrientes">Corrientes</option>
+                      <option value="Chaco">Chaco</option>
+                      <option value="Santiago del Estero">Santiago del Estero</option>
+                      <option value="La Pampa">La Pampa</option>
+                      <option value="Catamarca">Catamarca</option>
+                      <option value="Chubut">Chubut</option>
+                      <option value="Formosa">Formosa</option>
+                      <option value="Jujuy">Jujuy</option>
+                      <option value="La Rioja">La Rioja</option>
                       <option value="Mendoza">Mendoza</option>
-                      <option value="Otra">Otra Provincia</option>
+                      <option value="Misiones">Misiones</option>
+                      <option value="Neuquén">Neuquén</option>
+                      <option value="Río Negro">Río Negro</option>
+                      <option value="Salta">Salta</option>
+                      <option value="San Juan">San Juan</option>
+                      <option value="San Luis">San Luis</option>
+                      <option value="Santa Cruz">Santa Cruz</option>
+                      <option value="Tierra del Fuego">Tierra del Fuego</option>
+                      <option value="Tucumán">Tucumán</option>
                     </select>
                   </div>
                   <div>
