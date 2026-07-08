@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /#/admin
+
+Sitemap: https://modomate1.com.ar/sitemap.xml
