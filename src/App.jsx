@@ -237,30 +237,93 @@ function App() {
     }
   };
 
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-  };
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
 
-  // --- Handlers de Catálogo (Admin CRUD) ---
-  const handleAddProduct = (newProduct) => {
-    setProducts([newProduct, ...products]);
-  };
-
-  const handleUpdateProduct = (updatedProduct) => {
-    setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
-    if (selectedProduct?.id === updatedProduct.id) {
-      setSelectedProduct(updatedProduct);
+      if (!response.ok) throw new Error('Error al actualizar el estado del pedido');
+      
+      const updatedOrder = await response.json();
+      setOrders(orders.map(order => order.id === orderId ? updatedOrder : order));
+    } catch (err) {
+      console.error(err);
+      alert('Error al actualizar el estado: ' + err.message);
     }
   };
 
-  const handleDeleteProduct = (productId) => {
-    setProducts(products.filter(p => p.id !== productId));
-    setCartItems(cartItems.filter(item => item.id !== productId));
-    if (selectedProduct?.id === productId) {
-      setCurrentTab('shop');
-      setSelectedProduct(null);
+  // --- Handlers de Catálogo (Admin CRUD) ---
+  const handleAddProduct = async (newProduct) => {
+    try {
+      const response = await fetch(`${API_URL}/api/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(newProduct)
+      });
+
+      if (!response.ok) throw new Error('Error al agregar el producto');
+
+      const savedProduct = await response.json();
+      setProducts([savedProduct, ...products]);
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar el producto: ' + err.message);
+    }
+  };
+
+  const handleUpdateProduct = async (updatedProduct) => {
+    try {
+      const response = await fetch(`${API_URL}/api/products/${updatedProduct.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(updatedProduct)
+      });
+
+      if (!response.ok) throw new Error('Error al actualizar el producto');
+
+      const savedProduct = await response.json();
+      setProducts(products.map(p => p.id === savedProduct.id ? savedProduct : p));
+      if (selectedProduct?.id === savedProduct.id) {
+        setSelectedProduct(savedProduct);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error al actualizar el producto: ' + err.message);
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Error al eliminar el producto');
+
+      setProducts(products.filter(p => p.id !== productId));
+      setCartItems(cartItems.filter(item => item.id !== productId));
+      if (selectedProduct?.id === productId) {
+        setCurrentTab('shop');
+        setSelectedProduct(null);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error al eliminar el producto: ' + err.message);
     }
   };
 
