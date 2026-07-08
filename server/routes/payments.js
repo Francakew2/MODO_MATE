@@ -57,12 +57,12 @@ router.post('/create-preference', requireAuth, async (req, res) => {
         },
         external_reference: order.id, // ID del pedido para asociarlo en el Webhook
         back_urls: {
-          success: 'https://modomate.com.ar/pago-exitoso',
-          failure: 'https://modomate.com.ar/pago-fallido',
-          pending: 'https://modomate.com.ar/pago-pendiente'
+          success: 'https://modo-mate.franciscochaulet011.workers.dev/',
+          failure: 'https://modo-mate.franciscochaulet011.workers.dev/',
+          pending: 'https://modo-mate.franciscochaulet011.workers.dev/'
         },
         auto_return: 'approved',
-        notification_url: 'https://modo-mate-api.onrender.com/api/payments/webhook' // Cambiar al URL real en despliegue
+        notification_url: 'https://modo-mate.onrender.com/api/payments/webhook' // Cambiar al URL real en despliegue
       }
     });
 
