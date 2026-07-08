@@ -8,27 +8,28 @@ import CheckoutModal from './components/CheckoutModal';
 import AdminPanel from './components/AdminPanel';
 import { ArrowLeft, Check, Sparkles, Heart, Info, ArrowRight, Truck, CreditCard, Phone, MapPin, LayoutGrid, Leaf, Sprout, Clock, ExternalLink, Store } from 'lucide-react';
 import Logo from './components/Logo';
+import { supabase } from './lib/supabase';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 function App() {
   // --- Estados Globales ---
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('mm_products');
-    if (saved) return JSON.parse(saved);
-    localStorage.setItem('mm_products', JSON.stringify(initialProducts));
-    return initialProducts;
-  });
+  const [products, setProducts] = useState(initialProducts);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+
+  // Estados de Autenticación de Supabase
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState('customer'); // 'customer' | 'admin'
 
   const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('mm_cart');
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('mm_orders');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [orders, setOrders] = useState([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
-  const [userRole, setUserRole] = useState('customer'); // 'customer' | 'admin'
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'productos'
   const [currentTab, setCurrentTab] = useState('shop'); // 'shop' | 'product-detail'
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -44,18 +45,69 @@ function App() {
   const [detailShippingCost, setDetailShippingCost] = useState(null);
   const [detailZipChecked, setDetailZipChecked] = useState(false);
 
-  // --- Sincronización LocalStorage ---
+  // --- Cargar Productos desde la API ---
   useEffect(() => {
-    localStorage.setItem('mm_products', JSON.stringify(products));
-  }, [products]);
+    const fetchProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        const response = await fetch(`${API_URL}/api/products`);
+        if (!response.ok) throw new Error('Error al obtener productos');
+        const data = await response.json();
+        setProducts(data.length > 0 ? data : initialProducts);
+      } catch (err) {
+        console.warn('[API] Error de conexión con el backend, usando fallback local de productos:', err.message);
+        setProducts(initialProducts);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
+  // --- Listener de Autenticación de Supabase ---
+  useEffect(() => {
+    // 1. Obtener sesión activa al cargar
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserRole(session.user.id);
+      }
+    });
+
+    // 2. Escuchar cambios en la autenticación (login, logout, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserRole(session.user.id);
+      } else {
+        setUserRole('customer');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserRole = async (userId) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      if (profile && !error) {
+        setUserRole(profile.role);
+      }
+    } catch (err) {
+      console.error('Error al obtener rol del usuario:', err);
+    }
+  };
+
+  // --- Sincronización LocalStorage ---
   useEffect(() => {
     localStorage.setItem('mm_cart', JSON.stringify(cartItems));
   }, [cartItems]);
-
-  useEffect(() => {
-    localStorage.setItem('mm_orders', JSON.stringify(orders));
-  }, [orders]);
 
   // --- Handlers de Carrito ---
   const handleAddToCart = (product, quantity = 1) => {
@@ -107,21 +159,82 @@ function App() {
   };
 
   // --- Handlers de Pedidos ---
-  const handleAddOrder = (newOrder) => {
-    setOrders([...orders, newOrder]);
-    
-    // Descontar stock de productos comprados
-    const updatedProducts = products.map(product => {
-      const purchased = cartItems.find(item => item.id === product.id);
-      if (purchased) {
-        return {
-          ...product,
-          stock: Math.max(0, product.stock - purchased.quantity)
-        };
+  const handleAddOrder = async (orderData) => {
+    // Si no está logueado, alertar (requerimiento de OAuth)
+    if (!user) {
+      alert('Debes iniciar sesión con Google para poder finalizar la compra.');
+      handleGoogleLogin();
+      return null;
+    }
+
+    try {
+      // 1. Registrar pedido en el backend
+      const response = await fetch(`${API_URL}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          customer_name: orderData.customer,
+          customer_email: orderData.email,
+          customer_phone: orderData.phone,
+          customer_address: orderData.address,
+          customer_city: orderData.customerCity || '',
+          customer_zip: orderData.customerZip || '',
+          items: cartItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity
+          })),
+          shipping_cost: orderData.shippingCost || 0
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Error al procesar el pedido en el servidor');
       }
-      return product;
-    });
-    setProducts(updatedProducts);
+
+      const createdOrder = await response.json();
+      setOrders([createdOrder, ...orders]);
+
+      // Si el método de pago es Mercado Pago, generar la preferencia y redirigir
+      if (orderData.paymentMethodType === 'mercadopago') {
+        const mpResponse = await fetch(`${API_URL}/api/payments/create-preference`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            orderId: createdOrder.id
+          })
+        });
+
+        if (!mpResponse.ok) {
+          throw new Error('Error al generar la preferencia de pago en Mercado Pago');
+        }
+
+        const mpData = await mpResponse.json();
+        
+        // Redirigir al Checkout de Mercado Pago
+        if (mpData.init_point) {
+          window.location.href = mpData.init_point;
+        } else {
+          throw new Error('No se obtuvo el enlace de cobro de Mercado Pago.');
+        }
+      }
+
+      // Devolver la orden creada con su ID real para el modal de éxito (transferencia o simulación)
+      return createdOrder;
+
+    } catch (err) {
+      console.error('Error al registrar orden:', err);
+      alert(err.message || 'Hubo un problema al procesar tu compra. Por favor intenta nuevamente.');
+      return null;
+    }
   };
 
   const handleUpdateOrderStatus = (orderId, newStatus) => {
@@ -180,6 +293,36 @@ function App() {
     }).format(price);
   };
 
+  // --- Handlers de Autenticación de Supabase ---
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error al iniciar sesión con Google:', err.message);
+      alert('Error al iniciar sesión: ' + err.message);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      setSession(null);
+      setUserRole('customer');
+      setCurrentPage('home');
+      setCurrentTab('shop');
+    } catch (err) {
+      console.error('Error al cerrar sesión:', err.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-brand-arena/20 flex flex-col font-sans text-brand-dark">
       {/* Navbar Global */}
@@ -192,14 +335,10 @@ function App() {
         onOpenCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        user={user}
         userRole={userRole}
-        toggleRole={() => {
-          const nextRole = userRole === 'customer' ? 'admin' : 'customer';
-          setUserRole(nextRole);
-          if (nextRole === 'admin') {
-            setCurrentTab('shop');
-          }
-        }}
+        onLogin={handleGoogleLogin}
+        onLogout={handleSignOut}
       />
 
       {/* RUTA: VISTA ADMINISTRADOR */}

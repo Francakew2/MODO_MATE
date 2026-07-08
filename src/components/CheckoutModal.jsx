@@ -87,7 +87,7 @@ export default function CheckoutModal({
     setCardData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.address || !formData.phone) {
       alert('Por favor completa todos los datos de envío obligatorios.');
@@ -103,29 +103,34 @@ export default function CheckoutModal({
 
     setIsProcessing(true);
 
-    // Simular retraso de procesamiento (pasarela de pago)
-    setTimeout(() => {
-      const generatedId = `MM-${Math.floor(100000 + Math.random() * 900000)}`;
-      setOrderId(generatedId);
-      setIsProcessing(false);
-      setStep(2);
-
-      // Guardar orden para el panel de administración
-      const newOrder = {
-        id: generatedId,
-        date: new Date().toLocaleDateString('es-AR') + ' ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+    try {
+      // Estructurar los datos para la llamada a la API
+      const orderPayload = {
         customer: formData.name,
         email: formData.email,
         phone: formData.phone,
         address: `${formData.address}, ${formData.city} (${formData.province})`,
-        paymentMethod: paymentMethod === 'transfer' ? 'Efectivo/Transferencia (10% OFF)' : paymentMethod === 'card' ? `Tarjeta (${cardData.installments} cuotas)` : 'Mercado Pago',
-        items: cartItems.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
-        total: finalTotal,
-        status: 'Pendiente'
+        customerCity: formData.city,
+        customerZip: formData.zipCode,
+        shippingCost: shippingCost,
+        paymentMethodType: paymentMethod // 'transfer' | 'card' | 'mercadopago'
       };
-      
-      onAddOrder(newOrder);
-    }, 2000);
+
+      const resultOrder = await onAddOrder(orderPayload);
+
+      if (resultOrder) {
+        // Si el pago es por Mercado Pago, la página redirige automáticamente en App.jsx,
+        // por lo que no hace falta avanzar al step 2 aquí.
+        if (paymentMethod !== 'mercadopago') {
+          setOrderId(resultOrder.id);
+          setStep(2);
+        }
+      }
+    } catch (err) {
+      console.error('Error al confirmar compra:', err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleFinish = () => {

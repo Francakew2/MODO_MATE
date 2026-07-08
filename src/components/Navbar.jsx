@@ -11,8 +11,10 @@ export default function Navbar({
   onOpenCart,
   searchQuery,
   setSearchQuery,
+  user,
   userRole,
-  toggleRole
+  onLogin,
+  onLogout
 }) {
   return (
     <header className="sticky top-0 z-40 w-full bg-brand-green-dark text-white shadow-md">
@@ -79,29 +81,64 @@ export default function Navbar({
             <span className="hidden xs:inline">Productos</span>
           </button>
 
-          {/* Role Switcher Demo Control */}
-          <button
-            onClick={toggleRole}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
-              userRole === 'admin' 
-                ? 'bg-amber-500 text-brand-dark hover:bg-amber-400' 
-                : 'bg-white/10 text-brand-gold hover:bg-white/20'
-            }`}
-            title="Cambiar rol para demostración de la maqueta"
-          >
-            {userRole === 'admin' ? (
-              <>
-                <ShieldAlert className="w-4 h-4" />
-                <span>Admin</span>
-              </>
-            ) : (
-              <>
-                <UserCheck className="w-4 h-4" />
-                <span className="hidden sm:inline">Cliente</span>
-                <span className="sm:hidden">Cli</span>
-              </>
-            )}
-          </button>
+          {/* Autenticación Real de Supabase */}
+          {!user ? (
+            <button
+              onClick={onLogin}
+              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-dark px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5"
+              title="Iniciar sesión con Google"
+            >
+              <span>Ingresar</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              {/* Si es Admin, mostrar el botón de acceso al panel */}
+              {userRole === 'admin' && (
+                <button
+                  onClick={() => { setCurrentPage('productos'); setCurrentTab('admin'); }}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
+                    currentTab === 'admin'
+                      ? 'bg-amber-500 text-brand-dark'
+                      : 'bg-white/10 text-brand-gold hover:bg-white/20'
+                  }`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">Panel Admin</span>
+                </button>
+              )}
+
+              {/* Botón de Logout o Avatar */}
+              <div className="flex items-center gap-2 group relative cursor-pointer py-2">
+                <img
+                  src={user.user_metadata?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'}
+                  alt={user.user_metadata?.full_name || 'Usuario'}
+                  className="w-8 h-8 rounded-full border border-white/40 object-cover"
+                />
+                
+                {/* Menú flotante al pasar el mouse (hover) */}
+                <div className="absolute right-0 top-full mt-1 hidden group-hover:block bg-white text-brand-dark rounded-xl shadow-lg border border-brand-arena py-2 w-48 animate-fade-in z-50">
+                  <div className="px-4 py-2 border-b border-brand-arena">
+                    <p className="text-xs font-bold truncate">{user.user_metadata?.full_name || 'Cliente MODO MATE'}</p>
+                    <p className="text-[10px] text-brand-gray truncate">{user.email}</p>
+                  </div>
+                  {userRole !== 'admin' && (
+                    <button
+                      onClick={() => { setCurrentPage('productos'); setCurrentTab('my-orders'); }}
+                      className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-brand-arena/30 transition-colors"
+                    >
+                      Mis Pedidos 📦
+                    </button>
+                  )}
+                  <button
+                    onClick={onLogout}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Cart Icon Button */}
           <button
