@@ -30,31 +30,35 @@ export default function CheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState('');
 
-  // Auto-calculate shipping based on selected province
+  // Auto-calculate shipping based on zip code
   useEffect(() => {
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     if (subtotal >= 95000) {
       setShippingCost(0);
     } else {
-      const prov = formData.province;
-      if (prov === 'Santa Fe') {
-        setShippingCost(9900); // Provincial
-      } else if (
-        prov === 'CABA' || 
-        prov === 'Buenos Aires' || 
-        prov === 'Córdoba' || 
-        prov === 'Entre Ríos' || 
-        prov === 'Corrientes' || 
-        prov === 'Chaco' || 
-        prov === 'Santiago del Estero' || 
-        prov === 'La Pampa'
-      ) {
+      const code = parseInt(formData.zipCode) || 0;
+      // A) Santa Fe (Local)
+      const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
+      
+      // B) Regional
+      const isRegional = 
+        (code >= 1000 && code <= 1999) || // CABA y GBA
+        (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
+        (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
+        (code >= 3400 && code <= 3499) || // Corrientes
+        (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
+        (code >= 5000 && code <= 5999) || // Córdoba y San Luis
+        (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
+        
+      if (isSantaFe) {
+        setShippingCost(9900); // Provincial (Santa Fe)
+      } else if (isRegional) {
         setShippingCost(11500); // Regional
       } else {
         setShippingCost(13000); // Nacional
       }
     }
-  }, [formData.province, cartItems]);
+  }, [formData.zipCode, cartItems]);
 
   if (!isOpen) return null;
 

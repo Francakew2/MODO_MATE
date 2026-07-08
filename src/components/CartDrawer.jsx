@@ -32,16 +32,29 @@ export default function CartDrawer({
     e.preventDefault();
     if (!zipCode.trim()) return;
 
-    if (subtotal >= 75000) {
+    if (subtotal >= 95000) {
       setShippingCost(0);
     } else {
-      const code = parseInt(zipCode);
-      if (code >= 1000 && code <= 1499) {
-        setShippingCost(3500); // CABA
-      } else if (code >= 1500 && code <= 1999) {
-        setShippingCost(5500); // GBA
+      const code = parseInt(zipCode) || 0;
+      // A) Santa Fe (Local)
+      const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
+      
+      // B) Regional
+      const isRegional = 
+        (code >= 1000 && code <= 1999) || // CABA y GBA
+        (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
+        (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
+        (code >= 3400 && code <= 3499) || // Corrientes
+        (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
+        (code >= 5000 && code <= 5999) || // Córdoba y San Luis
+        (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
+        
+      if (isSantaFe) {
+        setShippingCost(9900); // Provincial (Santa Fe)
+      } else if (isRegional) {
+        setShippingCost(11500); // Regional
       } else {
-        setShippingCost(7500); // Interior del país
+        setShippingCost(13000); // Nacional
       }
     }
     setZipChecked(true);
