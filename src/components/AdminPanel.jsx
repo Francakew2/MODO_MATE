@@ -23,7 +23,8 @@ export default function AdminPanel({
   onUpdateProduct, 
   onDeleteProduct,
   onUpdateOrderStatus,
-  onUploadImage
+  onUploadImage,
+  onDeleteOrder
 }) {
   const [activeSubTab, setActiveSubTab] = useState('dashboard'); // 'dashboard', 'catalog', 'orders'
   const [editingProduct, setEditingProduct] = useState(null);
@@ -608,16 +609,26 @@ export default function AdminPanel({
                   <tbody className="divide-y divide-brand-arena">
                     {orders.map(order => (
                       <tr key={order.id} className="hover:bg-brand-arena/10">
-                        <td className="p-3 font-bold font-mono text-brand-green-dark">{order.id}</td>
-                        <td className="p-3 font-medium">{order.customer}</td>
-                        <td className="p-3 text-brand-gray">{order.date}</td>
+                        <td className="p-3 font-bold font-mono text-brand-green-dark" title={order.id}>
+                          {order.id.slice(0, 8)}...
+                        </td>
+                        <td className="p-3 font-medium">{order.customer_name || order.customer}</td>
+                        <td className="p-3 text-brand-gray">
+                          {order.created_at ? new Date(order.created_at).toLocaleDateString('es-AR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : order.date}
+                        </td>
                         <td className="p-3 font-bold">{formatPrice(order.total)}</td>
                         <td className="p-3">
                           <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${getStatusClass(order.status)}`}>
                             {order.status}
                           </span>
                         </td>
-                        <td className="p-3 text-right space-x-2">
+                        <td className="p-3 text-right flex items-center justify-end gap-2">
                           <button
                             onClick={() => setSelectedOrder(order)}
                             className="inline-flex items-center gap-1.5 p-1.5 bg-brand-arena hover:bg-brand-gray/30 text-brand-dark rounded font-semibold"
@@ -638,6 +649,18 @@ export default function AdminPanel({
                             <option value="Completado">Completado</option>
                             <option value="Cancelado">Cancelado</option>
                           </select>
+
+                          <button
+                            onClick={() => {
+                              if (window.confirm('¿Estás seguro de que deseas eliminar este pedido permanentemente de la base de datos?')) {
+                                onDeleteOrder(order.id);
+                              }
+                            }}
+                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded"
+                            title="Eliminar pedido"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -654,7 +677,9 @@ export default function AdminPanel({
                   <div className="flex justify-between items-center pb-2 border-b border-brand-arena">
                     <div>
                       <h3 className="text-sm font-black text-brand-dark">Detalle Pedido: <span className="font-mono text-brand-green-dark">{selectedOrder.id}</span></h3>
-                      <p className="text-[10px] text-brand-gray">Fecha: {selectedOrder.date}</p>
+                      <p className="text-[10px] text-brand-gray">
+                        Fecha: {selectedOrder.created_at ? new Date(selectedOrder.created_at).toLocaleString('es-AR') : selectedOrder.date}
+                      </p>
                     </div>
                     <button onClick={() => setSelectedOrder(null)} className="text-brand-gray hover:text-brand-dark">
                       <XCircle className="w-5 h-5" />
@@ -664,10 +689,10 @@ export default function AdminPanel({
                   <div className="space-y-2">
                     <p className="font-bold text-brand-green-dark">1. Datos del Cliente</p>
                     <div className="bg-brand-arena/30 rounded-xl p-3 border border-brand-arena space-y-1 text-brand-dark/95">
-                      <p><strong>Nombre:</strong> {selectedOrder.customer}</p>
-                      <p><strong>Email:</strong> {selectedOrder.email}</p>
-                      <p><strong>Teléfono:</strong> {selectedOrder.phone}</p>
-                      <p><strong>Dirección:</strong> {selectedOrder.address}</p>
+                      <p><strong>Nombre:</strong> {selectedOrder.customer_name || selectedOrder.customer}</p>
+                      <p><strong>Email:</strong> {selectedOrder.customer_email || selectedOrder.email}</p>
+                      <p><strong>Teléfono:</strong> {selectedOrder.customer_phone || selectedOrder.phone}</p>
+                      <p><strong>Dirección:</strong> {selectedOrder.customer_address || selectedOrder.address}</p>
                     </div>
                   </div>
 
@@ -693,7 +718,7 @@ export default function AdminPanel({
                   <div className="space-y-2 pt-2 border-t border-brand-arena flex items-center justify-between">
                     <div>
                       <p className="font-bold text-brand-dark">Medio de Pago:</p>
-                      <p className="text-brand-gray text-[10px]">{selectedOrder.paymentMethod}</p>
+                      <p className="text-brand-gray text-[10px]">{selectedOrder.payment_method || selectedOrder.paymentMethod}</p>
                     </div>
                     <div className="flex items-center gap-1.5 bg-brand-arena/40 px-3 py-1.5 rounded-full border border-brand-arena font-bold">
                       {getStatusIcon(selectedOrder.status)}

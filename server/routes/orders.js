@@ -157,4 +157,20 @@ router.put('/:id/status', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// 5. Eliminar un pedido (Solo Admin)
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.json({ message: 'Pedido eliminado correctamente.' });
+  } catch (err) {
+    console.error('Error al eliminar pedido:', err);
+    res.status(500).json({ error: 'Error al eliminar el pedido.' });
+  }
+});
+
 module.exports = router;

@@ -261,7 +261,7 @@ function App() {
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
@@ -276,6 +276,24 @@ function App() {
     } catch (err) {
       console.error(err);
       alert('Error al actualizar el estado: ' + err.message);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Error al eliminar el pedido');
+
+      setOrders(orders.filter(order => order.id !== orderId));
+    } catch (err) {
+      console.error(err);
+      alert('Error al eliminar el pedido: ' + err.message);
     }
   };
 
@@ -465,6 +483,7 @@ function App() {
           onDeleteProduct={handleDeleteProduct}
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onUploadImage={handleImageUpload}
+          onDeleteOrder={handleDeleteOrder}
         />
       ) : (
         /* RUTA: VISTA CLIENTE */
