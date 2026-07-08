@@ -41,28 +41,42 @@ router.post('/create-preference', requireAuth, async (req, res) => {
 
     const preference = new Preference(client);
     
+    // Mapear los productos a items de Mercado Pago
+    const items = order.items.map(item => ({
+      id: item.id,
+      title: item.name,
+      quantity: item.quantity,
+      unit_price: parseFloat(item.price),
+      currency_id: 'ARS'
+    }));
+
+    // Si hay costo de envío, lo agregamos como un item virtual de cobro
+    if (order.shipping_cost > 0) {
+      items.push({
+        id: 'shipping_cost',
+        title: 'Costo de Envío (Correo Argentino)',
+        quantity: 1,
+        unit_price: parseFloat(order.shipping_cost),
+        currency_id: 'ARS'
+      });
+    }
+    
     // Crear preferencia en Mercado Pago
     const result = await preference.create({
       body: {
-        items: order.items.map(item => ({
-          id: item.id,
-          title: item.name,
-          quantity: item.quantity,
-          unit_price: parseFloat(item.price),
-          currency_id: 'ARS'
-        })),
+        items,
         payer: {
           email: order.customer_email || req.user.email,
           name: order.customer_name
         },
         external_reference: order.id, // ID del pedido para asociarlo en el Webhook
         back_urls: {
-          success: 'https://modo-mate.franciscochaulet011.workers.dev/',
-          failure: 'https://modo-mate.franciscochaulet011.workers.dev/',
-          pending: 'https://modo-mate.franciscochaulet011.workers.dev/'
+          success: 'https://modomate1.com.ar/',
+          failure: 'https://modomate1.com.ar/',
+          pending: 'https://modomate1.com.ar/'
         },
         auto_return: 'approved',
-        notification_url: 'https://modo-mate.onrender.com/api/payments/webhook' // Cambiar al URL real en despliegue
+        notification_url: 'https://modo-mate.onrender.com/api/payments/webhook' // URL en Render
       }
     });
 
