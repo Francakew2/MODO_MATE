@@ -327,6 +327,36 @@ function App() {
     }
   };
 
+  // --- Handler para subir imágenes a Supabase Storage ---
+  const handleImageUpload = async (file) => {
+    try {
+      // Generar nombre de archivo único
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // Subir el archivo al bucket 'products'
+      const { data, error } = await supabase.storage
+        .from('products')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      // Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('products')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.error('Error uploading image to Supabase:', err);
+      throw new Error('No se pudo subir la imagen. Verifica que el bucket "products" esté creado como público en Supabase.');
+    }
+  };
+
   // --- Navegación a Detalle de Producto ---
   const handleViewProductDetails = (product) => {
     setSelectedProduct(product);
@@ -413,6 +443,7 @@ function App() {
           onUpdateProduct={handleUpdateProduct}
           onDeleteProduct={handleDeleteProduct}
           onUpdateOrderStatus={handleUpdateOrderStatus}
+          onUploadImage={handleImageUpload}
         />
       ) : (
         /* RUTA: VISTA CLIENTE */

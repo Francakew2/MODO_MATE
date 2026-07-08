@@ -22,12 +22,14 @@ export default function AdminPanel({
   onAddProduct, 
   onUpdateProduct, 
   onDeleteProduct,
-  onUpdateOrderStatus 
+  onUpdateOrderStatus,
+  onUploadImage
 }) {
   const [activeSubTab, setActiveSubTab] = useState('dashboard'); // 'dashboard', 'catalog', 'orders'
   const [editingProduct, setEditingProduct] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Form State for Adding/Editing
   const [productForm, setProductForm] = useState({
@@ -61,6 +63,24 @@ export default function AdminPanel({
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setProductForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const publicUrl = await onUploadImage(file);
+      if (publicUrl) {
+        setProductForm(prev => ({ ...prev, image: publicUrl }));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error al subir imagen: ' + err.message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   // Open Form for Create
@@ -410,15 +430,32 @@ export default function AdminPanel({
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block font-semibold text-brand-dark mb-1">Imagen URL (Unsplash)</label>
-                    <input
-                      type="text"
-                      name="image"
-                      value={productForm.image}
-                      onChange={handleFormChange}
-                      placeholder="https://images.unsplash.com/..."
-                      className="w-full bg-white border border-brand-arena rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-brand-green"
-                    />
+                    <label className="block font-semibold text-brand-dark mb-1">Imagen del Producto *</label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          disabled={isUploading}
+                          className="text-xs text-brand-dark file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-brand-green/10 file:text-brand-green-dark hover:file:bg-brand-green/20 file:cursor-pointer"
+                        />
+                        {isUploading && (
+                          <span className="text-xs text-brand-gold font-bold animate-pulse">Subiendo...</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-brand-gray uppercase font-bold">O ingresar URL:</span>
+                        <input
+                          type="text"
+                          name="image"
+                          value={productForm.image}
+                          onChange={handleFormChange}
+                          placeholder="https://images.unsplash.com/..."
+                          className="flex-1 bg-white border border-brand-arena rounded-lg px-2.5 py-1 focus:outline-none focus:border-brand-green text-xs"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div className="sm:col-span-3">
                     <label className="block font-semibold text-brand-dark mb-1">Descripción</label>
