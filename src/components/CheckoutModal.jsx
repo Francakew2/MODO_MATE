@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CreditCard, Landmark, ShieldCheck, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { X, CreditCard, Landmark, ShieldCheck, CheckCircle2, Loader2, ArrowRight, Phone } from 'lucide-react';
 
 export default function CheckoutModal({
   isOpen,
@@ -571,9 +571,20 @@ export default function CheckoutModal({
             <div className="bg-brand-arena/20 border border-brand-arena rounded-2xl p-5 text-xs text-left w-full space-y-3">
               <p className="font-bold text-brand-dark text-sm border-b border-brand-arena pb-1">¿Cómo sigue tu pedido?</p>
               {paymentMethod === 'transfer' ? (
-                <p className="text-brand-dark">
-                  👉 <strong>Envíanos el comprobante:</strong> Realizá la transferencia al CBU indicado anteriormente por el total de <strong>{formatPrice(finalTotal)}</strong> y envianos una captura del comprobante a nuestro WhatsApp <strong>+54 9 11 3456-7890</strong> indicando tu número de pedido ({orderId}).
-                </p>
+                <div className="space-y-3">
+                  <p className="text-brand-dark">
+                    👉 <strong>Envíanos el comprobante:</strong> Realizá la transferencia al CBU indicado anteriormente por el total de <strong>{formatPrice(finalTotal)}</strong> y envianos una captura del comprobante a nuestro WhatsApp <strong>+54 9 3408 67-1408</strong> indicando tu número de pedido ({orderId}).
+                  </p>
+                  <a 
+                    href={`https://wa.me/5493408671408?text=Hola!%20Acabo%20de%20hacer%20un%20pedido%20con%20el%20ID%20%23${orderId.slice(0, 8)}.%20Acá%20está%20el%20comprobante%20de%20la%20transferencia.`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-[#25D366] hover:bg-[#20BA56] text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                  >
+                    <Phone className="w-3.5 h-3.5 fill-white text-white" />
+                    <span>Enviar Comprobante por WhatsApp</span>
+                  </a>
+                </div>
               ) : paymentMethod === 'card' ? (
                 <p className="text-brand-dark">
                   💳 <strong>Pago Procesado:</strong> Tu pago en {cardData.installments} cuotas ha sido aprobado correctamente. En las próximas 24 horas hábiles armaremos tu pedido para despacharlo a la dirección <strong>{formData.address}</strong>.
