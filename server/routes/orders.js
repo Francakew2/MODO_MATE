@@ -62,14 +62,24 @@ router.post('/', requireAuth, async (req, res) => {
     // 1. Calcular el total del pedido en el servidor para evitar fraudes en el precio del frontend
     let subtotal = 0;
     
+    // Validar formato UUID para evitar errores de casteo en PostgreSQL
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const productIds = items.map(i => i.id).filter(id => uuidRegex.test(id));
+
+    if (productIds.length === 0) {
+      return res.status(400).json({ error: 'Ninguno de los productos en tu carrito está disponible en la base de datos actual.' });
+    }
+
     // Obtener información de precios actuales de los productos cargados en el carrito
-    const productIds = items.map(i => i.id);
     const { data: dbProducts, error: dbError } = await supabase
       .from('products')
       .select('id, price, stock')
       .in('id', productIds);
 
-    if (dbError || !dbProducts) throw new Error('Error al validar productos en la base de datos.');
+    if (dbError || !dbProducts) {
+      console.error('Error Supabase al consultar productos:', dbError);
+      throw new Error('Error al validar productos en la base de datos.');
+    }
 
     const priceMap = {};
     const stockMap = {};
@@ -81,7 +91,7 @@ router.post('/', requireAuth, async (req, res) => {
     // Validar stock y sumar precios
     for (const item of items) {
       if (priceMap[item.id] === undefined) {
-        return res.status(400).json({ error: `El producto ${item.name} ya no está disponible.` });
+        return res.status(400).json({ error: `El producto "${item.name}" ya no está disponible en el catálogo de producción.` });
       }
       if (stockMap[item.id] < item.quantity) {
         return res.status(400).json({ error: `Stock insuficiente para ${item.name}. Disponibles: ${stockMap[item.id]}` });
