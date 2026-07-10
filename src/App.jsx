@@ -700,6 +700,76 @@ function App() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Fila 2: El Presente (Hoy) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center mt-16 sm:mt-24 pt-16 border-t border-brand-arena/50">
+                    {/* Columna de imagen (Collage de fotos hoy, hoyy, hoyyy) */}
+                    <div className="relative order-2 lg:order-1">
+                      <div className="grid grid-cols-3 gap-3 h-80 sm:h-96">
+                        <div className="col-span-2 rounded-3xl overflow-hidden shadow-md border border-brand-arena hover-lift-glow">
+                          <img 
+                            src="/images/hoyyy.webp" 
+                            alt="Modo Mate Hoy - Local Renovado" 
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex-1 rounded-2xl overflow-hidden shadow-md border border-brand-arena hover-lift-glow">
+                            <img 
+                              src="/images/hoy.webp" 
+                              alt="Mate imperial de frente" 
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                          </div>
+                          <div className="flex-1 rounded-2xl overflow-hidden shadow-md border border-brand-arena hover-lift-glow">
+                            <img 
+                              src="/images/hoyy.webp" 
+                              alt="Estantería con variedad de mates y termos" 
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Badge flotante */}
+                      <div className="absolute -bottom-4 -right-4 bg-brand-green-dark text-white rounded-2xl px-5 py-3 shadow-lg border-4 border-white">
+                        <p className="text-xs font-bold uppercase tracking-wider">✨ Nuestro Presente</p>
+                        <p className="text-[10px] text-brand-green-light mt-0.5">Espacio totalmente renovado</p>
+                      </div>
+                    </div>
+
+                    {/* Columna de texto */}
+                    <div className="space-y-6 order-1 lg:order-2">
+                      <div>
+                        <span className="text-xs font-bold uppercase tracking-widest text-brand-gold">El Presente</span>
+                        <h3 className="text-2xl sm:text-3xl font-black text-brand-dark mt-2 leading-tight section-title-accent">
+                          Un espacio pensado <br />para vos 🌿
+                        </h3>
+                      </div>
+                      <div className="space-y-4 text-sm text-brand-gray leading-relaxed">
+                        <p>
+                          Con el paso del tiempo, nuestro local creció y se renovó por completo. De la mano del esfuerzo diario y de la confianza inquebrantable de nuestra comunidad, logramos armar un espacio mucho más amplio, cómodo y repleto de variedad para todos los amantes del mate.
+                        </p>
+                        <p>
+                          Hoy nos enorgullece ofrecer una experiencia premium y personalizada: desde estanterías cargadas con los mejores mates imperiales y camioneros seleccionados de forma artesanal, hasta termos premium y blends de yerbas orgánicas exclusivas.
+                        </p>
+                        <p>
+                          Seguimos creciendo con el mismo compromiso y valores del primer día, cuidando la calidad en cada detalle para seguir compartiendo con vos el amor por el mate.
+                        </p>
+                      </div>
+                      {/* Línea de tiempo mini */}
+                      <div className="flex items-center gap-4 pt-4">
+                        <div className="flex items-center gap-2 bg-brand-arena/40 rounded-full px-4 py-2">
+                          <Clock className="w-4 h-4 text-brand-green-dark" />
+                          <span className="text-xs font-bold text-brand-dark">Hoy</span>
+                        </div>
+                        <div className="h-px flex-1 bg-brand-arena"></div>
+                        <div className="flex items-center gap-2 bg-brand-gold text-brand-dark rounded-full px-4 py-2">
+                          <Sparkles className="w-4 h-4 text-brand-green-dark" />
+                          <span className="text-xs font-bold">Modo Mate Hoy 🧉</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
@@ -729,12 +799,12 @@ function App() {
                     </div>
                     <div className="group relative rounded-2xl overflow-hidden shadow-md border border-brand-arena hover-lift-glow cursor-pointer">
                       <img 
-                        src="/images/local-modo-mate.png" 
-                        alt="Local Modo Mate" 
+                        src="/images/frente.webp" 
+                        alt="Frente de nuestro local Modo Mate" 
                         className="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5">
-                        <p className="text-white text-xs font-bold">🏪 Nuestro local en San Cristóbal con yerbas a granel</p>
+                        <p className="text-white text-xs font-bold">🏪 El frente de nuestro local en San Cristóbal, Santa Fe</p>
                       </div>
                     </div>
                     <div className="group relative rounded-2xl overflow-hidden shadow-md border border-brand-arena hover-lift-glow cursor-pointer sm:col-span-2 lg:col-span-1">
