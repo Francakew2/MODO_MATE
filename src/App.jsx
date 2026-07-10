@@ -621,7 +621,7 @@ function App() {
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider">Envío a Todo el País</h4>
-                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Gratis superando los $75.000</p>
+                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Por Correo Argentino a domicilio o sucursal</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/35 hover:scale-[1.01] hover:shadow-xs transition-all duration-300">
