@@ -245,7 +245,7 @@ export default function CartDrawer({
                 </div>
                 
                 <div className="flex justify-between text-green-600 text-xs">
-                  <span>Descuento Transferencia/Efectivo (10%):</span>
+                  <span>Descuento Transferencia (10%):</span>
                   <span>-{formatPrice(cashDiscount)}</span>
                 </div>
 

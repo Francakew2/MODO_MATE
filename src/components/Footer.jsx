@@ -79,7 +79,13 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
             </li>
             <li className="flex items-start gap-2.5">
               <Clock className="w-5 h-5 text-brand-gold shrink-0 mt-0.5" />
-              <span>Lunes: 17:30 - 20:00<br />Martes a Viernes: 9:00 - 18:00<br />Sábados y Domingos: Cerrado</span>
+              <span>
+                Lunes a Viernes:<br />
+                Mañana: 9:00 - 11:30 | Tarde: 17:00 - 20:00 hs<br />
+                Sábados:<br />
+                Mañana: 9:00 - 12:00 | Tarde: 18:00 - 20:30 hs<br />
+                Domingos: Cerrado
+              </span>
             </li>
           </ul>
         </div>
@@ -121,9 +127,8 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
           {/* Payment Badges list */}
           <div className="flex flex-wrap justify-center gap-2 text-[10px] font-bold text-brand-gray uppercase tracking-widest">
             <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Mercado Pago</span>
-            <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Efectivo 10% OFF</span>
+            <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Transferencia 10% OFF</span>
             <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Tarjetas Crédito/Débito</span>
-            <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Transferencia</span>
           </div>
         </div>
       </div>

@@ -35,6 +35,7 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('Todos');
+  const [subCategoryFilter, setSubCategoryFilter] = useState('Todos');
 
   // Contacto Form States
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' });
@@ -451,7 +452,30 @@ function App() {
     const matchesCategory = categoryFilter === 'Todos' || product.category === categoryFilter;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    
+    let matchesSubCategory = true;
+    if (categoryFilter === 'Mates' && subCategoryFilter !== 'Todos') {
+      const nameLower = product.name.toLowerCase();
+      if (subCategoryFilter === 'Imperiales') {
+        matchesSubCategory = nameLower.includes('imperial');
+      } else if (subCategoryFilter === 'Torpedo') {
+        matchesSubCategory = nameLower.includes('torpedo');
+      } else if (subCategoryFilter === 'Camioneros') {
+        matchesSubCategory = nameLower.includes('camionero');
+      } else if (subCategoryFilter === 'Criollos') {
+        matchesSubCategory = nameLower.includes('criollo');
+      } else if (subCategoryFilter === 'Algarrobo') {
+        matchesSubCategory = nameLower.includes('algarrobo');
+      } else if (subCategoryFilter === 'Otros') {
+        matchesSubCategory = !nameLower.includes('imperial') && 
+                             !nameLower.includes('torpedo') && 
+                             !nameLower.includes('camionero') && 
+                             !nameLower.includes('criollo') && 
+                             !nameLower.includes('algarrobo');
+      }
+    }
+    
+    return matchesCategory && matchesSearch && matchesSubCategory;
   });
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -555,7 +579,7 @@ function App() {
                       <span className="text-brand-gold">buena idea.</span>
                     </h2>
                     <p className="text-sm sm:text-base text-brand-green-light/90 leading-relaxed max-w-lg">
-                      Mates artesanales, termos premium, yerbas orgánicas y mucho más. Cada producto lleva un pedacito de nuestro corazón.
+                      Mates artesanales, termos premium, yerbas orgánicas y mucho más. Cada producto lleva un pedacito de nuestro corazón, y nuestro amor por el mate.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                       <button
@@ -601,7 +625,6 @@ function App() {
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider">Pagos Flexibles</h4>
-                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">3 Cuotas sin interés o 10% OFF efectivo</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/35 hover:scale-[1.01] hover:shadow-xs transition-all duration-300">
@@ -783,9 +806,9 @@ function App() {
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-brand-dark">Horarios</h4>
-                            <p className="text-xs text-brand-gray mt-0.5">Lunes: 17:30 - 20:00</p>
-                            <p className="text-xs text-brand-gray">Martes a Viernes: 9:00 - 18:00</p>
-                            <p className="text-xs text-brand-gray">Sábados y Domingos: Cerrado</p>
+                            <p className="text-xs text-brand-gray mt-0.5">Lunes a Viernes: 9:00 - 11:30 / 17:00 - 20:00 hs</p>
+                            <p className="text-xs text-brand-gray">Sábados: 9:00 - 12:00 / 18:00 - 20:30 hs</p>
+                            <p className="text-xs text-brand-gray">Domingos: Cerrado</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
@@ -844,11 +867,13 @@ function App() {
                       Nuestros <span className="text-brand-gold">Productos</span>
                     </h2>
                     <p className="text-sm text-brand-green-light/80 leading-relaxed">
-                      Explorá nuestra selección de mates artesanales imperiales, termos premium y yerbas orgánicas estacionadas.
+                      Explorá nuestro mundo del mate: mates artesanales, accesorios, yerbas orgánicas y tradicionales, hierbas, blends. Cada producto lleva un pedacito de nuestro corazón.
                     </p>
                   </div>
-                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                    <span className="text-white/20 font-black text-4xl tracking-widest uppercase text-center font-sans select-none leading-tight">MODO<br />MATE</span>
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 p-6 shadow-inner">
+                    <div className="w-full h-full text-white opacity-20">
+                      <Logo className="w-full h-full" />
+                    </div>
                   </div>
                 </div>
               </section>
@@ -900,7 +925,7 @@ function App() {
                     ].map((cat) => (
                       <button
                         key={cat.name}
-                        onClick={() => setCategoryFilter(cat.name)}
+                        onClick={() => { setCategoryFilter(cat.name); setSubCategoryFilter('Todos'); }}
                         className={`category-circle-btn ${categoryFilter === cat.name ? 'active' : ''}`}
                       >
                         <div className="circle-icon-wrapper">
@@ -920,19 +945,46 @@ function App() {
 
               {/* Grid de Productos */}
               <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+                {/* Subcategorías de Mates */}
+                {categoryFilter === 'Mates' && (
+                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start mb-8 pb-4 border-b border-brand-arena">
+                    {[
+                      'Todos',
+                      'Imperiales',
+                      'Torpedo',
+                      'Camioneros',
+                      'Criollos',
+                      'Algarrobo',
+                      'Otros'
+                    ].map((subCat) => (
+                      <button
+                        key={subCat}
+                        onClick={() => setSubCategoryFilter(subCat)}
+                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full border transition-all duration-200 cursor-pointer ${
+                          subCategoryFilter === subCat
+                            ? 'bg-brand-green-dark text-white border-brand-green-dark shadow-sm'
+                            : 'bg-white text-brand-dark border-brand-arena hover:border-brand-gray'
+                        }`}
+                      >
+                        {subCat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {filteredProducts.length === 0 ? (
                   <div className="text-center py-16 bg-white rounded-3xl border border-brand-arena p-8 max-w-md mx-auto space-y-4">
                     <p className="text-sm font-bold text-brand-dark">No encontramos productos que coincidan con tu búsqueda.</p>
                     <p className="text-xs text-brand-gray">Probá ingresando otras palabras clave o cambiando la categoría seleccionada.</p>
                     <button 
-                      onClick={() => { setSearchQuery(''); setCategoryFilter('Todos'); }}
+                      onClick={() => { setSearchQuery(''); setCategoryFilter('Todos'); setSubCategoryFilter('Todos'); }}
                       className="bg-brand-green text-white font-bold text-xs px-5 py-2 rounded-full"
                     >
                       Restaurar Catálogo
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8">
                     {filteredProducts.map(product => (
                       <ProductCard 
                         key={product.id}
@@ -985,7 +1037,7 @@ function App() {
                         {formatPrice(selectedProduct.price)}
                       </span>
                       <div className="text-xs text-green-600 font-bold bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
-                        💬 {formatPrice(selectedProduct.price * 0.9)} en efectivo/transferencia
+                        💬 {formatPrice(selectedProduct.price * 0.9)} con transferencia
                       </div>
                     </div>
                   </div>
@@ -1292,9 +1344,9 @@ function App() {
                           </div>
                           <div className="space-y-1">
                             <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">Horarios de Atención</p>
-                            <p className="text-sm font-semibold text-brand-dark">Lunes: 17:30 - 20:00</p>
-                            <p className="text-sm font-semibold text-brand-dark">Martes a Viernes: 9:00 - 18:00</p>
-                            <p className="text-sm font-semibold text-brand-dark">Sábados y Domingos: Cerrado</p>
+                            <p className="text-sm font-semibold text-brand-dark">Lunes a Viernes: Mañana: 9:00 - 11:30 | Tarde: 17:00 - 20:00 hs</p>
+                            <p className="text-sm font-semibold text-brand-dark">Sábados: Mañana: 9:00 - 12:00 | Tarde: 18:00 - 20:30 hs</p>
+                            <p className="text-sm font-semibold text-brand-dark">Domingos: Cerrado</p>
                           </div>
                         </div>
                       </div>

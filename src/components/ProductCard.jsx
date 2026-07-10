@@ -73,7 +73,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetails }) {
               {formatPrice(product.price)}
             </span>
             <span className="text-[10px] text-brand-gold font-bold uppercase tracking-wider">
-              {formatPrice(product.price * 0.9)} en efectivo
+              {formatPrice(product.price * 0.9)} con transferencia
             </span>
           </div>
 

@@ -643,9 +643,9 @@ export default function CheckoutModal({
                         <div className="text-xs text-brand-dark space-y-1">
                           <p className="font-bold uppercase tracking-wider">Local Oficial MODO MATE</p>
                           <p className="font-medium text-brand-gray">Bv. San Martín 1121, San Cristóbal, Santa Fe</p>
-                          <p className="text-[10px] text-brand-gold font-bold">Lunes: 17:30 - 20:00</p>
-                          <p className="text-[10px] text-brand-gold font-bold">Martes a Viernes: 9:00 - 18:00</p>
-                          <p className="text-[10px] text-brand-gold font-bold">Sábados y Domingos: Cerrado</p>
+                          <p className="text-[10px] text-brand-gold font-bold">Lunes a Viernes: Mañana: 9:00 - 11:30 | Tarde: 17:00 - 20:00 hs</p>
+                          <p className="text-[10px] text-brand-gold font-bold">Sábados: Mañana: 9:00 - 12:00 | Tarde: 18:00 - 20:30 hs</p>
+                          <p className="text-[10px] text-brand-gold font-bold">Domingos: Cerrado</p>
                           <p className="text-green-600 font-bold mt-1">✓ Retiro inmediato: Gratis</p>
                         </div>
                       </div>
