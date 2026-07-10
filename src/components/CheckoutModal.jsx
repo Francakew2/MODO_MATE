@@ -777,7 +777,6 @@ export default function CheckoutModal({
                           <CreditCard className="w-5 h-5 shrink-0" />
                           <div className="text-left text-xs">
                             <p className="font-bold uppercase tracking-wider">Tarjeta de Crédito o Débito</p>
-                            <p className="text-[10px] text-brand-gold font-bold">Hasta 3 Cuotas sin interés</p>
                           </div>
                         </div>
                         <span className="text-xs font-bold text-brand-dark">{formatPrice(subtotal)}</span>
@@ -817,10 +816,10 @@ export default function CheckoutModal({
                         <p className="font-bold text-brand-green-dark text-sm uppercase tracking-wider">💰 Cuentas de Transferencia:</p>
                         <p>Realizá la transferencia por el total final a la siguiente cuenta oficial:</p>
                         <div className="bg-white p-3 border border-brand-arena font-mono space-y-1">
-                          <p><strong>Banco:</strong> Banco Galicia</p>
-                          <p><strong>Titular:</strong> MODO MATE S.H.</p>
-                          <p><strong>Alias:</strong> MODO.MATE.GALICIA</p>
-                          <p><strong>CBU:</strong> 0070123420000004567890</p>
+                          <p><strong>Banco:</strong> BANCO NACION</p>
+                          <p><strong>Titular:</strong> DIEGO OMAR FERNÁNDEZ - SILVANA CHIAPESSONI</p>
+                          <p><strong>Alias:</strong> modo.mate1121</p>
+                          <p><strong>CBU:</strong> 0110465730046571881797</p>
                         </div>
                         <p className="text-brand-gray italic font-medium">(*) Una vez finalizado el pedido, tendrás que hacer clic en el botón de WhatsApp para enviarnos el comprobante de transferencia.</p>
                       </div>
@@ -887,9 +886,9 @@ export default function CheckoutModal({
                               onChange={(e) => setCardData(prev => ({ ...prev, installments: e.target.value }))}
                               className="w-full bg-white border border-brand-arena px-2.5 py-1.5 text-xs text-brand-dark focus:outline-none focus:border-brand-green"
                             >
-                              <option value="1">1 cuota sin interés de {formatPrice(finalTotal)}</option>
-                              <option value="3">3 cuotas sin interés de {formatPrice(finalTotal / 3)}</option>
-                              <option value="6">6 cuotas de {formatPrice((finalTotal * 1.15) / 6)} (15% recargo)</option>
+                              <option value="1">1 pago de {formatPrice(finalTotal)}</option>
+                              <option value="3">3 cuotas de {formatPrice((finalTotal * 1.10) / 3)} (10% recargo)</option>
+                              <option value="6">6 cuotas de {formatPrice((finalTotal * 1.18) / 6)} (18% recargo)</option>
                             </select>
                           </div>
                         </div>
