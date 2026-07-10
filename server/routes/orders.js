@@ -51,7 +51,8 @@ router.post('/', requireAuth, async (req, res) => {
     customer_city, 
     customer_zip, 
     items, 
-    shipping_cost 
+    shipping_cost,
+    payment_method
   } = req.body;
 
   if (!customer_name || !items || items.length === 0) {
@@ -102,6 +103,14 @@ router.post('/', requireAuth, async (req, res) => {
     const shipCost = parseFloat(shipping_cost) || 0;
     const total = subtotal + shipCost;
 
+    // Mapear método de pago legible
+    let finalPaymentMethod = 'Mercado Pago';
+    if (payment_method === 'transfer') {
+      finalPaymentMethod = 'Transferencia Bancaria';
+    } else if (payment_method === 'card') {
+      finalPaymentMethod = 'Tarjeta de Crédito/Débito';
+    }
+
     // 2. Insertar pedido en la base de datos
     const { data: newOrder, error: orderError } = await supabase
       .from('orders')
@@ -117,7 +126,7 @@ router.post('/', requireAuth, async (req, res) => {
         subtotal,
         shipping_cost: shipCost,
         total,
-        payment_method: 'Mercado Pago',
+        payment_method: finalPaymentMethod,
         payment_status: 'pending',
         status: 'Pendiente'
       }])

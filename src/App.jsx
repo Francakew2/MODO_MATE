@@ -213,7 +213,8 @@ function App() {
             price: item.price,
             quantity: item.quantity
           })),
-          shipping_cost: orderData.shippingCost || 0
+          shipping_cost: orderData.shippingCost || 0,
+          payment_method: orderData.paymentMethodType
         })
       });
 
