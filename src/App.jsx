@@ -1031,15 +1031,12 @@ function App() {
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-black text-brand-dark leading-tight">{selectedProduct.name}</h2>
                     
-                    {/* Prices */}
-                    <div className="pt-2 flex items-baseline gap-4">
-                      <span className="text-2xl sm:text-3xl font-black text-brand-green-dark">
-                        {formatPrice(selectedProduct.price)}
-                      </span>
-                      <div className="text-xs text-green-600 font-bold bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
-                        💬 {formatPrice(selectedProduct.price * 0.9)} con transferencia
+                      {/* Prices */}
+                      <div className="pt-2 flex items-baseline gap-4">
+                        <span className="text-2xl sm:text-3xl font-black text-brand-green-dark">
+                          {formatPrice(selectedProduct.price)}
+                        </span>
                       </div>
-                    </div>
                   </div>
 
                   <p className="text-sm text-brand-gray leading-relaxed border-t border-brand-arena pt-4">
@@ -1082,30 +1079,26 @@ function App() {
                         onClick={(e) => {
                           e.preventDefault();
                           if (!detailZipCode) return;
-                          if (selectedProduct.price >= 95000) {
-                            setDetailShippingCost({ home: 0, branch: 0 });
-                          } else {
-                            const code = parseInt(detailZipCode) || 0;
-                            // A) Santa Fe (Local)
-                            const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
+                          const code = parseInt(detailZipCode) || 0;
+                          // A) Santa Fe (Local)
+                          const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
+                          
+                          // B) Regional
+                          const isRegional = 
+                            (code >= 1000 && code <= 1999) || // CABA y GBA
+                            (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
+                            (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
+                            (code >= 3400 && code <= 3499) || // Corrientes
+                            (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
+                            (code >= 5000 && code <= 5999) || // Córdoba y San Luis
+                            (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
                             
-                            // B) Regional
-                            const isRegional = 
-                              (code >= 1000 && code <= 1999) || // CABA y GBA
-                              (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
-                              (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
-                              (code >= 3400 && code <= 3499) || // Corrientes
-                              (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
-                              (code >= 5000 && code <= 5999) || // Córdoba y San Luis
-                              (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
-                              
-                            if (isSantaFe) {
-                              setDetailShippingCost({ home: 9900, branch: 6900 });
-                            } else if (isRegional) {
-                              setDetailShippingCost({ home: 11500, branch: 8500 });
-                            } else {
-                              setDetailShippingCost({ home: 13000, branch: 9900 });
-                            }
+                          if (isSantaFe) {
+                            setDetailShippingCost({ home: 9900, branch: 6900 });
+                          } else if (isRegional) {
+                            setDetailShippingCost({ home: 11500, branch: 8500 });
+                          } else {
+                            setDetailShippingCost({ home: 13000, branch: 9900 });
                           }
                           setDetailZipChecked(true);
                         }}

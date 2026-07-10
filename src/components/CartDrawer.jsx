@@ -29,7 +29,6 @@ export default function CartDrawer({
 
   // Calcular costos de envío (Sucursal vs Domicilio)
   const getShippingCosts = () => {
-    if (subtotal >= 95000) return { home: 0, branch: 0 };
     if (!zipCode.trim() || !zipChecked) return { home: 0, branch: 0 };
 
     const code = parseInt(zipCode) || 0;
@@ -64,8 +63,7 @@ export default function CartDrawer({
   const costs = getShippingCosts();
   const activeShippingCost = zipChecked ? (shippingMethod === 'home' ? costs.home : costs.branch) : 0;
 
-  const cashDiscount = subtotal * 0.1;
-  const isFreeShipping = subtotal >= 95000;
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -244,10 +242,7 @@ export default function CartDrawer({
                   <span className="font-bold text-brand-dark">{formatPrice(subtotal)}</span>
                 </div>
                 
-                <div className="flex justify-between text-green-600 text-xs">
-                  <span>Descuento Transferencia (10%):</span>
-                  <span>-{formatPrice(cashDiscount)}</span>
-                </div>
+
 
                 {zipChecked && activeShippingCost > 0 && (
                   <div className="flex justify-between text-brand-gray text-xs">

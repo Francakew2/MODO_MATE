@@ -127,7 +127,7 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
           {/* Payment Badges list */}
           <div className="flex flex-wrap justify-center gap-2 text-[10px] font-bold text-brand-gray uppercase tracking-widest">
             <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Mercado Pago</span>
-            <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Transferencia 10% OFF</span>
+            <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Transferencia Bancaria</span>
             <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Tarjetas Crédito/Débito</span>
           </div>
         </div>

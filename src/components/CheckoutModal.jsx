@@ -72,19 +72,10 @@ export default function CheckoutModal({
       else if (isRegional) baseRate = 11500;
     }
 
-    // Free shipping threshold check (classic/branch only)
-    if (subtotal >= 95000) {
-      if (deliveryMethod === 'branch' || shippingType === 'classic') {
-        setShippingCost(0);
-      } else {
-        setShippingCost(4400); // Expreso has a reduced surcharge if subtotal >= 95k
-      }
+    if (deliveryMethod === 'branch' || shippingType === 'classic') {
+      setShippingCost(baseRate);
     } else {
-      if (deliveryMethod === 'branch' || shippingType === 'classic') {
-        setShippingCost(baseRate);
-      } else {
-        setShippingCost(baseRate + 4400); // Expreso has $4.400 surcharge
-      }
+      setShippingCost(baseRate + 4400); // Expreso has $4.400 surcharge
     }
   }, [formData.zipCode, deliveryMethod, shippingType, cartItems]);
 
@@ -101,9 +92,8 @@ export default function CheckoutModal({
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
   // Calculate final totals based on payment method
-  const discountRate = paymentMethod === 'transfer' ? 0.1 : 0;
-  const discountAmount = subtotal * discountRate;
-  const finalTotal = subtotal - discountAmount + shippingCost;
+  const discountAmount = 0;
+  const finalTotal = subtotal + shippingCost;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -764,10 +754,9 @@ export default function CheckoutModal({
                           <Landmark className="w-5 h-5 shrink-0" />
                           <div className="text-left text-xs">
                             <p className="font-bold uppercase tracking-wider">Transferencia Bancaria</p>
-                            <p className="text-[10px] text-green-600 font-bold">10% de Descuento Inmediato</p>
                           </div>
                         </div>
-                        <span className="text-xs font-bold text-brand-dark">{formatPrice(subtotal * 0.9)}</span>
+                        <span className="text-xs font-bold text-brand-dark">{formatPrice(subtotal)}</span>
                       </label>
 
                       {/* Tarjeta */}
