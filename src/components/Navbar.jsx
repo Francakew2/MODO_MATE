@@ -65,7 +65,7 @@ export default function Navbar({
             }`}
           >
             <Home className="w-4 h-4 shrink-0" />
-            <span className="inline">Inicio</span>
+            <span className="hidden sm:inline">Inicio</span>
           </button>
 
           {/* Navegación Principal: Productos */}
@@ -78,7 +78,7 @@ export default function Navbar({
             }`}
           >
             <Store className="w-4 h-4 shrink-0" />
-            <span className="inline">Productos</span>
+            <span className="hidden sm:inline">Productos</span>
           </button>
 
           {/* Navegación Principal: Contacto */}
@@ -91,17 +91,18 @@ export default function Navbar({
             }`}
           >
             <User className="w-4 h-4 shrink-0" />
-            <span className="inline">Contacto</span>
+            <span className="hidden sm:inline">Contacto</span>
           </button>
 
           {/* Autenticación Real de Supabase */}
           {!user ? (
             <button
               onClick={onLogin}
-              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-dark px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5"
+              className="bg-brand-gold hover:bg-brand-gold/90 text-brand-dark px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5"
               title="Iniciar sesión con Google"
             >
-              <span>Ingresar</span>
+              <User className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Ingresar</span>
             </button>
           ) : (
             <div className="flex items-center gap-2">
