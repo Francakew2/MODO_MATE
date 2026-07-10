@@ -10,7 +10,7 @@ export default function CartDrawer({
   onCheckout
 }) {
   const [zipCode, setZipCode] = useState('');
-  const [shippingCost, setShippingCost] = useState(null);
+  const [shippingMethod, setShippingMethod] = useState('branch'); // 'branch' | 'home'
   const [zipChecked, setZipChecked] = useState(false);
 
   if (!isOpen) return null;
@@ -27,41 +27,45 @@ export default function CartDrawer({
   // Subtotal
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Calcular envío
+  // Calcular costos de envío (Sucursal vs Domicilio)
+  const getShippingCosts = () => {
+    if (subtotal >= 95000) return { home: 0, branch: 0 };
+    if (!zipCode.trim() || !zipChecked) return { home: 0, branch: 0 };
+
+    const code = parseInt(zipCode) || 0;
+    // A) Santa Fe (Local)
+    const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
+    
+    // B) Regional
+    const isRegional = 
+      (code >= 1000 && code <= 1999) || // CABA y GBA
+      (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
+      (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
+      (code >= 3400 && code <= 3499) || // Corrientes
+      (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
+      (code >= 5000 && code <= 5999) || // Córdoba y San Luis
+      (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
+      
+    if (isSantaFe) {
+      return { home: 9900, branch: 6900 };
+    } else if (isRegional) {
+      return { home: 11500, branch: 8500 };
+    } else {
+      return { home: 13000, branch: 9900 };
+    }
+  };
+
   const handleCalculateShipping = (e) => {
     e.preventDefault();
     if (!zipCode.trim()) return;
-
-    if (subtotal >= 95000) {
-      setShippingCost(0);
-    } else {
-      const code = parseInt(zipCode) || 0;
-      // A) Santa Fe (Local)
-      const isSantaFe = (code >= 2000 && code <= 2699) || (code >= 3000 && code <= 3099);
-      
-      // B) Regional
-      const isRegional = 
-        (code >= 1000 && code <= 1999) || // CABA y GBA
-        (code >= 2700 && code <= 2999) || // Norte de Buenos Aires
-        (code >= 3100 && code <= 3399) || // Entre Ríos y Misiones
-        (code >= 3400 && code <= 3499) || // Corrientes
-        (code >= 3500 && code <= 3799) || // Chaco, Formosa, Reconquista
-        (code >= 5000 && code <= 5999) || // Córdoba y San Luis
-        (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
-        
-      if (isSantaFe) {
-        setShippingCost(9900); // Provincial (Santa Fe)
-      } else if (isRegional) {
-        setShippingCost(11500); // Regional
-      } else {
-        setShippingCost(13000); // Nacional
-      }
-    }
     setZipChecked(true);
   };
 
+  const costs = getShippingCosts();
+  const activeShippingCost = zipChecked ? (shippingMethod === 'home' ? costs.home : costs.branch) : 0;
+
   const cashDiscount = subtotal * 0.1;
-  const isFreeShipping = subtotal >= 75000;
+  const isFreeShipping = subtotal >= 95000;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -185,11 +189,50 @@ export default function CartDrawer({
                 </form>
                 
                 {zipChecked && (
-                  <div className="mt-2 text-xs flex justify-between font-semibold px-1">
-                    <span className="text-brand-gray">Costo de Envío:</span>
-                    <span className={shippingCost === 0 ? "text-green-600 font-bold" : "text-brand-dark"}>
-                      {shippingCost === 0 ? "¡Gratis!" : formatPrice(shippingCost)}
-                    </span>
+                  <div className="mt-3 pt-2 border-t border-brand-arena/50 space-y-1.5 text-[11px] text-brand-dark">
+                    <p className="font-bold text-[9px] text-brand-gray uppercase tracking-wider mb-1">
+                      Envíos por Correo Argentino:
+                    </p>
+                    
+                    {/* Opción Sucursal */}
+                    <label className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all ${
+                      shippingMethod === 'branch' ? 'border-brand-dark bg-brand-arena/10 font-bold' : 'border-brand-arena/50 hover:border-brand-gray bg-white'
+                    }`}>
+                      <div className="flex items-center gap-1.5">
+                        <input 
+                          type="radio" 
+                          name="cartShippingMethod" 
+                          value="branch"
+                          checked={shippingMethod === 'branch'}
+                          onChange={() => setShippingMethod('branch')}
+                          className="text-brand-green focus:ring-0 w-3 h-3"
+                        />
+                        <span>A Sucursal (Más barato)</span>
+                      </div>
+                      <span className={costs.branch === 0 ? "text-green-600 font-extrabold" : ""}>
+                        {costs.branch === 0 ? "¡Gratis!" : formatPrice(costs.branch)}
+                      </span>
+                    </label>
+
+                    {/* Opción Domicilio */}
+                    <label className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all ${
+                      shippingMethod === 'home' ? 'border-brand-dark bg-brand-arena/10 font-bold' : 'border-brand-arena/50 hover:border-brand-gray bg-white'
+                    }`}>
+                      <div className="flex items-center gap-1.5">
+                        <input 
+                          type="radio" 
+                          name="cartShippingMethod" 
+                          value="home"
+                          checked={shippingMethod === 'home'}
+                          onChange={() => setShippingMethod('home')}
+                          className="text-brand-green focus:ring-0 w-3 h-3"
+                        />
+                        <span>A Domicilio</span>
+                      </div>
+                      <span className={costs.home === 0 ? "text-green-600 font-extrabold" : ""}>
+                        {costs.home === 0 ? "¡Gratis!" : formatPrice(costs.home)}
+                      </span>
+                    </label>
                   </div>
                 )}
               </div>
@@ -206,17 +249,17 @@ export default function CartDrawer({
                   <span>-{formatPrice(cashDiscount)}</span>
                 </div>
 
-                {zipChecked && shippingCost > 0 && (
+                {zipChecked && activeShippingCost > 0 && (
                   <div className="flex justify-between text-brand-gray text-xs">
-                    <span>Envío:</span>
-                    <span>{formatPrice(shippingCost)}</span>
+                    <span>Envío ({shippingMethod === 'home' ? 'Domicilio' : 'Sucursal'} Correo Argentino):</span>
+                    <span>{formatPrice(activeShippingCost)}</span>
                   </div>
                 )}
                 
                 <div className="flex justify-between text-base font-black text-brand-dark border-t border-brand-arena pt-2">
                   <span>Total estimado:</span>
                   <span className="text-lg text-brand-green-dark">
-                    {formatPrice(subtotal + (zipChecked ? shippingCost : 0))}
+                    {formatPrice(subtotal + activeShippingCost)}
                   </span>
                 </div>
               </div>

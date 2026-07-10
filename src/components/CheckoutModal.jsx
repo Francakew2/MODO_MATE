@@ -9,7 +9,7 @@ export default function CheckoutModal({
   onAddOrder
 }) {
   const [step, setStep] = useState(1); // 1: Datos de Contacto y Entrega, 2: Pago, 3: Éxito
-  const [deliveryMethod, setDeliveryMethod] = useState('home'); // 'home' | 'pickup'
+  const [deliveryMethod, setDeliveryMethod] = useState('home'); // 'home' | 'branch' | 'pickup'
   const [shippingType, setShippingType] = useState('classic'); // 'classic' | 'expreso'
   
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export default function CheckoutModal({
     zipCode: ''
   });
 
-  const [paymentMethod, setPaymentMethod] = useState('transfer'); // 'transfer', 'card', 'mercadopago'
+  const [paymentMethod, setPaymentMethod] = useState('transfer'); // 'transfer' | 'card' | 'mercadopago'
   const [cardData, setCardData] = useState({
     number: '',
     name: '',
@@ -61,22 +61,26 @@ export default function CheckoutModal({
       (code >= 5000 && code <= 5999) || // Córdoba y San Luis
       (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
 
-    let baseRate = 13000; // Nacional default
-    if (isSantaFe) {
+    let baseRate = 13000;
+    if (deliveryMethod === 'branch') {
       baseRate = 9900;
-    } else if (isRegional) {
-      baseRate = 11500;
+      if (isSantaFe) baseRate = 6900;
+      else if (isRegional) baseRate = 8500;
+    } else {
+      baseRate = 13000;
+      if (isSantaFe) baseRate = 9900;
+      else if (isRegional) baseRate = 11500;
     }
 
-    // Free shipping threshold check (classic only)
+    // Free shipping threshold check (classic/branch only)
     if (subtotal >= 95000) {
-      if (shippingType === 'classic') {
+      if (deliveryMethod === 'branch' || shippingType === 'classic') {
         setShippingCost(0);
       } else {
         setShippingCost(4400); // Expreso has a reduced surcharge if subtotal >= 95k
       }
     } else {
-      if (shippingType === 'classic') {
+      if (deliveryMethod === 'branch' || shippingType === 'classic') {
         setShippingCost(baseRate);
       } else {
         setShippingCost(baseRate + 4400); // Expreso has $4.400 surcharge
@@ -138,10 +142,19 @@ export default function CheckoutModal({
       return;
     }
 
-    // Si es a domicilio, validar campos de dirección
+    // Si es a domicilio o sucursal, validar campos de dirección
     if (deliveryMethod === 'home') {
       if (!formData.address || !formData.city || !formData.zipCode) {
         alert('Por favor, completa los datos de tu dirección de entrega.');
+        return;
+      }
+      if (formData.zipCode.length < 4) {
+        alert('Por favor, ingresa un código postal válido de 4 dígitos.');
+        return;
+      }
+    } else if (deliveryMethod === 'branch') {
+      if (!formData.city || !formData.zipCode) {
+        alert('Por favor, completa la localidad y código postal para el envío a sucursal.');
         return;
       }
       if (formData.zipCode.length < 4) {
@@ -167,17 +180,22 @@ export default function CheckoutModal({
 
     try {
       // Estructurar los datos para la llamada a la API
-      const fullAddress = deliveryMethod === 'home'
-        ? `${formData.address}${formData.floorDept ? ' ' + formData.floorDept : ''}, ${formData.city} (${formData.province})`
-        : 'Retiro en Local: J.M. Bullo 1275, San Cristóbal, Santa Fe';
+      let fullAddress = '';
+      if (deliveryMethod === 'home') {
+        fullAddress = `${formData.address}${formData.floorDept ? ' ' + formData.floorDept : ''}, ${formData.city} (${formData.province})`;
+      } else if (deliveryMethod === 'branch') {
+        fullAddress = `Envío a Sucursal Correo Argentino: Localidad: ${formData.city} (${formData.province}) - CP: ${formData.zipCode}${formData.floorDept ? ' (Pref: ' + formData.floorDept + ')' : ''}`;
+      } else {
+        fullAddress = 'Retiro en Local: Bv. San Martín 1121, San Cristóbal, Santa Fe';
+      }
 
       const orderPayload = {
         customer: `${formData.name} ${formData.lastName}`,
         email: formData.email,
         phone: formData.phone,
         address: fullAddress,
-        customerCity: deliveryMethod === 'home' ? formData.city : 'San Cristóbal',
-        customerZip: deliveryMethod === 'home' ? formData.zipCode : '3070',
+        customerCity: deliveryMethod !== 'pickup' ? formData.city : 'San Cristóbal',
+        customerZip: deliveryMethod !== 'pickup' ? formData.zipCode : '3070',
         shippingCost: shippingCost,
         paymentMethodType: paymentMethod
       };
@@ -311,12 +329,12 @@ export default function CheckoutModal({
                       <span>Método de Entrega</span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       {/* Domicilio */}
-                      <label className={`flex flex-col items-center justify-center p-4 border cursor-pointer transition-all ${
+                      <label className={`flex flex-col items-center justify-center p-3 border cursor-pointer transition-all text-center ${
                         deliveryMethod === 'home' 
                           ? 'border-brand-dark bg-brand-arena/20 text-brand-dark font-bold' 
-                          : 'border-brand-arena hover:border-brand-gray text-brand-gray'
+                          : 'border-brand-arena hover:border-brand-gray text-brand-gray bg-white'
                       }`}>
                         <input 
                           type="radio" 
@@ -326,15 +344,35 @@ export default function CheckoutModal({
                           onChange={() => setDeliveryMethod('home')}
                           className="sr-only"
                         />
-                        <Truck className="w-5 h-5 mb-1.5" />
-                        <span className="text-xs uppercase tracking-wider">Envío a Domicilio</span>
+                        <Truck className="w-5 h-5 mb-1.5 text-brand-gold" />
+                        <span className="text-[10px] uppercase tracking-wider">A Domicilio</span>
+                        <span className="text-[8px] text-brand-gray font-normal lowercase mt-0.5">Correo Argentino</span>
                       </label>
 
                       {/* Sucursal */}
-                      <label className={`flex flex-col items-center justify-center p-4 border cursor-pointer transition-all ${
+                      <label className={`flex flex-col items-center justify-center p-3 border cursor-pointer transition-all text-center ${
+                        deliveryMethod === 'branch' 
+                          ? 'border-brand-dark bg-brand-arena/20 text-brand-dark font-bold' 
+                          : 'border-brand-arena hover:border-brand-gray text-brand-gray bg-white'
+                      }`}>
+                        <input 
+                          type="radio" 
+                          name="deliveryMethod" 
+                          value="branch" 
+                          checked={deliveryMethod === 'branch'} 
+                          onChange={() => setDeliveryMethod('branch')}
+                          className="sr-only"
+                        />
+                        <Truck className="w-5 h-5 mb-1.5 text-brand-green-dark" />
+                        <span className="text-[10px] uppercase tracking-wider">A Sucursal</span>
+                        <span className="text-[8px] text-brand-gray font-normal lowercase mt-0.5">más económico</span>
+                      </label>
+
+                      {/* Local */}
+                      <label className={`flex flex-col items-center justify-center p-3 border cursor-pointer transition-all text-center ${
                         deliveryMethod === 'pickup' 
                           ? 'border-brand-dark bg-brand-arena/20 text-brand-dark font-bold' 
-                          : 'border-brand-arena hover:border-brand-gray text-brand-gray'
+                          : 'border-brand-arena hover:border-brand-gray text-brand-gray bg-white'
                       }`}>
                         <input 
                           type="radio" 
@@ -344,14 +382,15 @@ export default function CheckoutModal({
                           onChange={() => setDeliveryMethod('pickup')}
                           className="sr-only"
                         />
-                        <Store className="w-5 h-5 mb-1.5" />
-                        <span className="text-xs uppercase tracking-wider">Retiro por Local</span>
+                        <Store className="w-5 h-5 mb-1.5 text-brand-gold" />
+                        <span className="text-[10px] uppercase tracking-wider">Retiro Local</span>
+                        <span className="text-[8px] text-brand-gray font-normal lowercase mt-0.5">sin costo</span>
                       </label>
                     </div>
                   </div>
 
                   {/* Detalle según método de envío */}
-                  {deliveryMethod === 'home' ? (
+                  {deliveryMethod !== 'pickup' ? (
                     <div className="space-y-4 bg-brand-arena/10 p-4 border border-brand-arena">
                       
                       {/* Ubicación y opciones Correo */}
@@ -371,59 +410,74 @@ export default function CheckoutModal({
 
                         {formData.zipCode && (
                           <div className="sm:col-span-2 space-y-2">
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Opciones de Envío (Correo Argentino)</label>
-                            
-                            {/* Clásico */}
-                            <label className={`flex items-center justify-between p-3 border cursor-pointer transition-all ${
-                              shippingType === 'classic' ? 'border-brand-dark bg-white font-bold' : 'border-brand-arena bg-white hover:border-brand-gray'
-                            }`}>
-                              <div className="flex items-center gap-2">
-                                <input 
-                                  type="radio" 
-                                  name="shippingType" 
-                                  value="classic" 
-                                  checked={shippingType === 'classic'}
-                                  onChange={() => setShippingType('classic')}
-                                  className="text-brand-green focus:ring-0"
-                                />
-                                <div className="text-xs text-brand-dark">
-                                  <p className="font-bold">Correo Argentino Clásico</p>
-                                  <p className="text-[10px] text-brand-gray font-normal">Llega entre 3 y 5 días hábiles.</p>
-                                </div>
-                              </div>
-                              <span className="text-xs font-bold text-brand-dark">
-                                {shippingCost === 0 && shippingType === 'classic' ? 'Gratis' : formatPrice(shippingCost - (shippingType === 'expreso' ? 4400 : 0))}
-                              </span>
-                            </label>
+                            {deliveryMethod === 'home' ? (
+                              <>
+                                <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Opciones de Envío (Correo Argentino)</label>
+                                
+                                {/* Clásico */}
+                                <label className={`flex items-center justify-between p-3 border cursor-pointer transition-all ${
+                                  shippingType === 'classic' ? 'border-brand-dark bg-white font-bold' : 'border-brand-arena bg-white hover:border-brand-gray'
+                                }`}>
+                                  <div className="flex items-center gap-2">
+                                    <input 
+                                      type="radio" 
+                                      name="shippingType" 
+                                      value="classic" 
+                                      checked={shippingType === 'classic'}
+                                      onChange={() => setShippingType('classic')}
+                                      className="text-brand-green focus:ring-0"
+                                    />
+                                    <div className="text-xs text-brand-dark">
+                                      <p className="font-bold">Correo Argentino Clásico</p>
+                                      <p className="text-[10px] text-brand-gray font-normal">Llega entre 3 y 5 días hábiles a domicilio.</p>
+                                    </div>
+                                  </div>
+                                  <span className="text-xs font-bold text-brand-dark">
+                                    {shippingCost === 0 && shippingType === 'classic' ? 'Gratis' : formatPrice(shippingCost - (shippingType === 'expreso' ? 4400 : 0))}
+                                  </span>
+                                </label>
 
-                            {/* Expreso */}
-                            <label className={`flex items-center justify-between p-3 border cursor-pointer transition-all ${
-                              shippingType === 'expreso' ? 'border-brand-dark bg-white font-bold' : 'border-brand-arena bg-white hover:border-brand-gray'
-                            }`}>
-                              <div className="flex items-center gap-2">
-                                <input 
-                                  type="radio" 
-                                  name="shippingType" 
-                                  value="expreso" 
-                                  checked={shippingType === 'expreso'}
-                                  onChange={() => setShippingType('expreso')}
-                                  className="text-brand-green focus:ring-0"
-                                />
-                                <div className="text-xs text-brand-dark">
-                                  <p className="font-bold">Correo Argentino Expreso</p>
-                                  <p className="text-[10px] text-brand-gray font-normal">Llega entre 1 y 2 días hábiles.</p>
+                                {/* Expreso */}
+                                <label className={`flex items-center justify-between p-3 border cursor-pointer transition-all ${
+                                  shippingType === 'expreso' ? 'border-brand-dark bg-white font-bold' : 'border-brand-arena bg-white hover:border-brand-gray'
+                                }`}>
+                                  <div className="flex items-center gap-2">
+                                    <input 
+                                      type="radio" 
+                                      name="shippingType" 
+                                      value="expreso" 
+                                      checked={shippingType === 'expreso'}
+                                      onChange={() => setShippingType('expreso')}
+                                      className="text-brand-green focus:ring-0"
+                                    />
+                                    <div className="text-xs text-brand-dark">
+                                      <p className="font-bold">Correo Argentino Expreso</p>
+                                      <p className="text-[10px] text-brand-gray font-normal">Llega entre 1 y 2 días hábiles a domicilio.</p>
+                                    </div>
+                                  </div>
+                                  <span className="text-xs font-bold text-brand-dark">
+                                    {formatPrice((shippingCost === 4400 && shippingType === 'expreso' ? 4400 : shippingCost) + (shippingType === 'classic' ? 4400 : 0))}
+                                  </span>
+                                </label>
+                              </>
+                            ) : (
+                              <>
+                                <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Costo de Envío a Sucursal Correo Argentino</label>
+                                <div className="bg-white p-3 border border-brand-arena text-xs flex justify-between items-center font-bold">
+                                  <span className="text-brand-gray font-normal">Envío Estándar a Sucursal:</span>
+                                  <span className={shippingCost === 0 ? "text-green-600 font-extrabold" : "text-brand-dark"}>
+                                    {shippingCost === 0 ? "¡Gratis!" : formatPrice(shippingCost)}
+                                  </span>
                                 </div>
-                              </div>
-                              <span className="text-xs font-bold text-brand-dark">
-                                {formatPrice((shippingCost === 4400 && shippingType === 'expreso' ? 4400 : shippingCost) + (shippingType === 'classic' ? 4400 : 0))}
-                              </span>
-                            </label>
+                                <p className="text-[10px] text-brand-gray font-medium">✓ Se enviará a la sucursal de Correo Argentino más cercana a tu localidad. Luego coordinaremos los detalles exactos por WhatsApp.</p>
+                              </>
+                            )}
 
                           </div>
                         )}
                       </div>
 
-                      {/* Datos del Destinatario (Domicilio) */}
+                      {/* Datos del Destinatario */}
                       <div className="space-y-3 pt-2 border-t border-brand-arena">
                         <div className="flex items-center gap-2 text-brand-dark font-bold text-xs uppercase tracking-wider">
                           <User className="w-3.5 h-3.5 text-brand-gold" />
@@ -486,33 +540,49 @@ export default function CheckoutModal({
                       <div className="space-y-3 pt-2 border-t border-brand-arena">
                         <div className="flex items-center gap-2 text-brand-dark font-bold text-xs uppercase tracking-wider">
                           <MapPin className="w-3.5 h-3.5 text-brand-gold" />
-                          <span>Dirección de Destino</span>
+                          <span>{deliveryMethod === 'home' ? 'Dirección de Destino' : 'Localidad de Destino'}</span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="col-span-2">
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Calle y Altura *</label>
-                            <input 
-                              type="text" 
-                              name="address" 
-                              required
-                              value={formData.address}
-                              onChange={handleInputChange}
-                              placeholder="Av. Rivadavia 1234"
-                              className="w-full bg-white border border-brand-arena px-3 py-2 text-sm text-brand-dark focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Piso / Dpto (Opcional)</label>
-                            <input 
-                              type="text" 
-                              name="floorDept" 
-                              value={formData.floorDept}
-                              onChange={handleInputChange}
-                              placeholder="Piso 2 Depto B"
-                              className="w-full bg-white border border-brand-arena px-3 py-2 text-sm text-brand-dark focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
+                          {deliveryMethod === 'home' ? (
+                            <>
+                              <div className="col-span-2">
+                                <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Calle y Altura *</label>
+                                <input 
+                                  type="text" 
+                                  name="address" 
+                                  required
+                                  value={formData.address}
+                                  onChange={handleInputChange}
+                                  placeholder="Av. Rivadavia 1234"
+                                  className="w-full bg-white border border-brand-arena px-3 py-2 text-sm text-brand-dark focus:outline-none focus:border-brand-green"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Piso / Dpto (Opcional)</label>
+                                <input 
+                                  type="text" 
+                                  name="floorDept" 
+                                  value={formData.floorDept}
+                                  onChange={handleInputChange}
+                                  placeholder="Piso 2 Depto B"
+                                  className="w-full bg-white border border-brand-arena px-3 py-2 text-sm text-brand-dark focus:outline-none focus:border-brand-green"
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            <div className="col-span-2">
+                              <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Sucursal Preferida o Comentarios (Opcional)</label>
+                              <input 
+                                type="text" 
+                                name="floorDept" 
+                                value={formData.floorDept}
+                                onChange={handleInputChange}
+                                placeholder="ej: Sucursal Centro / cerca de la plaza principal"
+                                className="w-full bg-white border border-brand-arena px-3 py-2 text-sm text-brand-dark focus:outline-none focus:border-brand-green"
+                              />
+                            </div>
+                          )}
                           <div>
                             <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider">Ciudad / Localidad *</label>
                             <input 
@@ -572,9 +642,10 @@ export default function CheckoutModal({
                         <MapPin className="w-5 h-5 text-brand-green-dark shrink-0 mt-0.5" />
                         <div className="text-xs text-brand-dark space-y-1">
                           <p className="font-bold uppercase tracking-wider">Local Oficial MODO MATE</p>
-                          <p className="font-medium text-brand-gray">J.M. Bullo 1275, San Cristóbal, Santa Fe</p>
-                          <p className="text-[10px] text-brand-gold font-bold">Lunes a Viernes: 9:00 - 13:00 / 17:00 - 21:00</p>
-                          <p className="text-[10px] text-brand-gold font-bold">Sábados: 9:00 - 13:00</p>
+                          <p className="font-medium text-brand-gray">Bv. San Martín 1121, San Cristóbal, Santa Fe</p>
+                          <p className="text-[10px] text-brand-gold font-bold">Lunes: 17:30 - 20:00</p>
+                          <p className="text-[10px] text-brand-gold font-bold">Martes a Viernes: 9:00 - 18:00</p>
+                          <p className="text-[10px] text-brand-gold font-bold">Sábados y Domingos: Cerrado</p>
                           <p className="text-green-600 font-bold mt-1">✓ Retiro inmediato: Gratis</p>
                         </div>
                       </div>

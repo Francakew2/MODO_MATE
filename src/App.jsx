@@ -401,7 +401,6 @@ function App() {
     }
   };
 
-  // --- Handler para el Formulario de Contacto ---
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) {
@@ -412,12 +411,26 @@ function App() {
     try {
       setIsSendingContact(true);
       // Simular retraso de red
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      alert(`¡Gracias por tu mensaje, ${contactForm.name}! Nos comunicaremos con vos a la brevedad por WhatsApp o correo electrónico.`);
+      const subject = encodeURIComponent(`Contacto Web MODO MATE - ${contactForm.name}`);
+      const body = encodeURIComponent(
+        `Hola MODO MATE,\n\nHas recibido un nuevo mensaje de contacto desde el sitio web:\n\n` +
+        `Nombre: ${contactForm.name}\n` +
+        `Email: ${contactForm.email}\n` +
+        `Teléfono: ${contactForm.phone || 'No especificado'}\n\n` +
+        `Mensaje:\n${contactForm.message}\n\n` +
+        `---\n` +
+        `Enviado desde el formulario de contacto de MODO MATE.`
+      );
+
+      // Redirigir al cliente de correo del usuario
+      window.location.href = `mailto:modomatesc@gmail.com?subject=${subject}&body=${body}`;
+
+      alert(`¡Gracias por tu mensaje, ${contactForm.name}! Se abrirá tu aplicación de correo para enviar el mensaje a modomatesc@gmail.com.`);
       setContactForm({ name: '', email: '', phone: '', message: '' });
     } catch (err) {
-      alert('Ocurrió un error al enviar el mensaje. Por favor, intenta de nuevo.');
+      alert('Ocurrió un error al preparar el mensaje. Por favor, intenta de nuevo.');
     } finally {
       setIsSendingContact(false);
     }
@@ -606,7 +619,7 @@ function App() {
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider">Local en San Cristóbal</h4>
-                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">J.M. Bullo 1275, Santa Fe</p>
+                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Bv. San Martín 1121, Santa Fe</p>
                     </div>
                   </div>
                 </div>
@@ -760,7 +773,7 @@ function App() {
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-brand-dark">Dirección</h4>
-                            <p className="text-xs text-brand-gray mt-0.5">J.M. Bullo 1275</p>
+                            <p className="text-xs text-brand-gray mt-0.5">Bv. San Martín 1121</p>
                             <p className="text-xs text-brand-gray">San Cristóbal, Santa Fe</p>
                           </div>
                         </div>
@@ -770,8 +783,9 @@ function App() {
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-brand-dark">Horarios</h4>
-                            <p className="text-xs text-brand-gray mt-0.5">Lunes a Viernes: 9:00 - 13:00 / 17:00 - 21:00</p>
-                            <p className="text-xs text-brand-gray">Sábados: 9:00 - 13:00</p>
+                            <p className="text-xs text-brand-gray mt-0.5">Lunes: 17:30 - 20:00</p>
+                            <p className="text-xs text-brand-gray">Martes a Viernes: 9:00 - 18:00</p>
+                            <p className="text-xs text-brand-gray">Sábados y Domingos: Cerrado</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
@@ -1017,7 +1031,7 @@ function App() {
                           e.preventDefault();
                           if (!detailZipCode) return;
                           if (selectedProduct.price >= 95000) {
-                            setDetailShippingCost(0);
+                            setDetailShippingCost({ home: 0, branch: 0 });
                           } else {
                             const code = parseInt(detailZipCode) || 0;
                             // A) Santa Fe (Local)
@@ -1034,11 +1048,11 @@ function App() {
                               (code >= 6000 && code <= 8199);   // Interior de Buenos Aires
                               
                             if (isSantaFe) {
-                              setDetailShippingCost(9900); // Provincial (Santa Fe)
+                              setDetailShippingCost({ home: 9900, branch: 6900 });
                             } else if (isRegional) {
-                              setDetailShippingCost(11500); // Regional
+                              setDetailShippingCost({ home: 11500, branch: 8500 });
                             } else {
-                              setDetailShippingCost(13000); // Nacional
+                              setDetailShippingCost({ home: 13000, branch: 9900 });
                             }
                           }
                           setDetailZipChecked(true);
@@ -1048,12 +1062,21 @@ function App() {
                         Calcular
                       </button>
                     </div>
-                    {detailZipChecked && (
-                      <div className="text-xs font-semibold px-1 flex justify-between">
-                        <span className="text-brand-gray">Costo de entrega:</span>
-                        <span className={detailShippingCost === 0 ? "text-green-600 font-extrabold" : "text-brand-dark"}>
-                          {detailShippingCost === 0 ? "¡Envío GRATIS!" : formatPrice(detailShippingCost)}
-                        </span>
+                    {detailZipChecked && detailShippingCost && (
+                      <div className="mt-2.5 p-2 bg-white border border-brand-arena rounded-xl text-xs space-y-1.5">
+                        <p className="font-bold text-[10px] text-brand-gray uppercase tracking-wider mb-0.5">Envíos por Correo Argentino:</p>
+                        <div className="flex justify-between items-center font-semibold px-1">
+                          <span className="text-brand-gray">➔ A Sucursal (Más barato):</span>
+                          <span className={detailShippingCost.branch === 0 ? "text-green-600 font-extrabold" : "text-brand-dark"}>
+                            {detailShippingCost.branch === 0 ? "¡Gratis!" : formatPrice(detailShippingCost.branch)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center font-semibold px-1">
+                          <span className="text-brand-gray">➔ A Domicilio:</span>
+                          <span className={detailShippingCost.home === 0 ? "text-green-600 font-extrabold" : "text-brand-dark"}>
+                            {detailShippingCost.home === 0 ? "¡Gratis!" : formatPrice(detailShippingCost.home)}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1240,19 +1263,38 @@ function App() {
                           </div>
                           <div className="space-y-1">
                             <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">Local Físico</p>
-                            <p className="text-sm font-semibold text-brand-dark">J.M. Bullo 1275, San Cristóbal, Santa Fe</p>
+                            <p className="text-sm font-semibold text-brand-dark">Bv. San Martín 1121, San Cristóbal, Santa Fe</p>
+                          </div>
+                        </div>
+
+                        {/* Correo Electrónico */}
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold shrink-0">
+                            <Mail className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">Correo Electrónico</p>
+                            <p className="text-sm font-semibold text-brand-dark">modomatesc@gmail.com</p>
+                            <a
+                              href="mailto:modomatesc@gmail.com"
+                              className="inline-flex items-center gap-1 text-xs text-brand-gold font-bold hover:underline"
+                            >
+                              <span>Enviar email</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
                           </div>
                         </div>
 
                         {/* Horarios */}
                         <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green shrink-0">
                             <Clock className="w-5 h-5" />
                           </div>
                           <div className="space-y-1">
                             <p className="text-xs font-bold text-brand-gray uppercase tracking-wider">Horarios de Atención</p>
-                            <p className="text-sm font-semibold text-brand-dark">Lunes a Viernes: 9:00 - 13:00 / 17:00 - 21:00</p>
-                            <p className="text-sm font-semibold text-brand-dark">Sábados: 9:00 - 13:00</p>
+                            <p className="text-sm font-semibold text-brand-dark">Lunes: 17:30 - 20:00</p>
+                            <p className="text-sm font-semibold text-brand-dark">Martes a Viernes: 9:00 - 18:00</p>
+                            <p className="text-sm font-semibold text-brand-dark">Sábados y Domingos: Cerrado</p>
                           </div>
                         </div>
                       </div>
@@ -1261,7 +1303,7 @@ function App() {
                     {/* Mapa embebido */}
                     <div className="bg-white border border-brand-arena overflow-hidden h-72 shadow-xs relative">
                       <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3434.721469145695!2d-61.1685412!3d-30.3020286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x944a95ef3963fdab%3A0xe9f798e4d3db2529!2sJ.%20M.%20Bullo%201275%2C%20S3040%20San%20Crist%C3%B3bal%2C%20Santa%20Fe!5e0!3m2!1ses-419!2sar!4v1720098000000!5m2!1ses-419!2sar" 
+                        src="https://maps.google.com/maps?q=Bv.%20San%20Mart%C3%ADn%201121,%20San%20Crist%C3%B3bal,%20Santa%20Fe&t=&z=16&ie=UTF8&iwloc=&output=embed" 
                         className="w-full h-full border-none"
                         allowFullScreen="" 
                         loading="lazy" 

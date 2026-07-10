@@ -71,7 +71,7 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
           <ul className="space-y-3 text-sm text-brand-gray">
             <li className="flex items-start gap-2.5">
               <MapPin className="w-5 h-5 text-brand-gold shrink-0 mt-0.5" />
-              <span>J.M. Bullo 1275<br />San Cristóbal, Santa Fe</span>
+              <span>Bv. San Martín 1121<br />San Cristóbal, Santa Fe</span>
             </li>
             <li className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-brand-gold shrink-0" />
@@ -79,7 +79,7 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
             </li>
             <li className="flex items-start gap-2.5">
               <Clock className="w-5 h-5 text-brand-gold shrink-0 mt-0.5" />
-              <span>Lunes a Viernes: 9:00 - 13:00 / 17:00 - 21:00<br />Sábados: 9:00 - 13:00</span>
+              <span>Lunes: 17:30 - 20:00<br />Martes a Viernes: 9:00 - 18:00<br />Sábados y Domingos: Cerrado</span>
             </li>
           </ul>
         </div>
