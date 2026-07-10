@@ -455,23 +455,28 @@ function App() {
     
     let matchesSubCategory = true;
     if (categoryFilter === 'Mates' && subCategoryFilter !== 'Todos') {
-      const nameLower = product.name.toLowerCase();
-      if (subCategoryFilter === 'Imperiales') {
-        matchesSubCategory = nameLower.includes('imperial');
-      } else if (subCategoryFilter === 'Torpedo') {
-        matchesSubCategory = nameLower.includes('torpedo');
-      } else if (subCategoryFilter === 'Camioneros') {
-        matchesSubCategory = nameLower.includes('camionero');
-      } else if (subCategoryFilter === 'Criollos') {
-        matchesSubCategory = nameLower.includes('criollo');
-      } else if (subCategoryFilter === 'Algarrobo') {
-        matchesSubCategory = nameLower.includes('algarrobo');
-      } else if (subCategoryFilter === 'Otros') {
-        matchesSubCategory = !nameLower.includes('imperial') && 
-                             !nameLower.includes('torpedo') && 
-                             !nameLower.includes('camionero') && 
-                             !nameLower.includes('criollo') && 
-                             !nameLower.includes('algarrobo');
+      const subCatValue = product.details?.subcategory;
+      if (subCatValue) {
+        matchesSubCategory = (subCatValue.toLowerCase() === subCategoryFilter.toLowerCase());
+      } else {
+        const nameLower = product.name.toLowerCase();
+        if (subCategoryFilter === 'Imperiales') {
+          matchesSubCategory = nameLower.includes('imperial');
+        } else if (subCategoryFilter === 'Torpedo') {
+          matchesSubCategory = nameLower.includes('torpedo');
+        } else if (subCategoryFilter === 'Camioneros') {
+          matchesSubCategory = nameLower.includes('camionero');
+        } else if (subCategoryFilter === 'Criollos') {
+          matchesSubCategory = nameLower.includes('criollo');
+        } else if (subCategoryFilter === 'Algarrobo') {
+          matchesSubCategory = nameLower.includes('algarrobo');
+        } else if (subCategoryFilter === 'Otros') {
+          matchesSubCategory = !nameLower.includes('imperial') && 
+                               !nameLower.includes('torpedo') && 
+                               !nameLower.includes('camionero') && 
+                               !nameLower.includes('criollo') && 
+                               !nameLower.includes('algarrobo');
+        }
       }
     }
     
@@ -758,10 +763,6 @@ function App() {
                       </div>
                       {/* Línea de tiempo mini */}
                       <div className="flex items-center gap-4 pt-4">
-                        <div className="flex items-center gap-2 bg-brand-arena/40 rounded-full px-4 py-2">
-                          <Clock className="w-4 h-4 text-brand-green-dark" />
-                          <span className="text-xs font-bold text-brand-dark">Hoy</span>
-                        </div>
                         <div className="h-px flex-1 bg-brand-arena"></div>
                         <div className="flex items-center gap-2 bg-brand-gold text-brand-dark rounded-full px-4 py-2">
                           <Sparkles className="w-4 h-4 text-brand-green-dark" />

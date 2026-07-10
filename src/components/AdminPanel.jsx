@@ -32,7 +32,6 @@ export default function AdminPanel({
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   
-  // Form State for Adding/Editing
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
@@ -42,7 +41,8 @@ export default function AdminPanel({
     image: '',
     material: '',
     virola: '',
-    origen: ''
+    origen: '',
+    subcategory: 'Imperiales'
   });
 
   const formatPrice = (price) => {
@@ -96,7 +96,8 @@ export default function AdminPanel({
       image: 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80', // Default placeholder unsplash
       material: '',
       virola: '',
-      origen: ''
+      origen: '',
+      subcategory: 'Imperiales'
     });
     setIsFormOpen(true);
   };
@@ -113,7 +114,8 @@ export default function AdminPanel({
       image: product.image,
       material: product.details?.material || product.details?.capacidad || '',
       virola: product.details?.virola || product.details?.peso || '',
-      origen: product.details?.origen || product.details?.termicidad || ''
+      origen: product.details?.origen || product.details?.termicidad || '',
+      subcategory: product.details?.subcategory || 'Imperiales'
     });
     setIsFormOpen(true);
   };
@@ -143,6 +145,7 @@ export default function AdminPanel({
       if (productForm.material) parsedDetails.material = productForm.material;
       if (productForm.virola) parsedDetails.virola = productForm.virola;
       if (productForm.origen) parsedDetails.origen = productForm.origen;
+      parsedDetails.subcategory = productForm.subcategory || 'Imperiales';
     } else if (productForm.category === 'Termos') {
       if (productForm.material) parsedDetails.capacidad = productForm.material; // Reusado
       if (productForm.virola) parsedDetails.material = productForm.virola; // Reusado
@@ -430,6 +433,25 @@ export default function AdminPanel({
                       <option value="Accesorios">Accesorios</option>
                     </select>
                   </div>
+
+                  {productForm.category === 'Mates' && (
+                    <div>
+                      <label className="block font-semibold text-brand-dark mb-1">Subcategoría de Mate</label>
+                      <select
+                        name="subcategory"
+                        value={productForm.subcategory}
+                        onChange={handleFormChange}
+                        className="w-full bg-white border border-brand-arena rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-brand-green font-bold text-brand-green-dark"
+                      >
+                        <option value="Imperiales">Imperiales</option>
+                        <option value="Torpedo">Torpedo</option>
+                        <option value="Camioneros">Camioneros</option>
+                        <option value="Criollos">Criollos</option>
+                        <option value="Algarrobo">Algarrobo</option>
+                        <option value="Otros">Otros</option>
+                      </select>
+                    </div>
+                  )}
                   <div className="sm:col-span-2">
                     <label className="block font-semibold text-brand-dark mb-1">Imagen del Producto *</label>
                     <div className="flex flex-col gap-2">
