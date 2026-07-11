@@ -17,7 +17,7 @@ export default function Navbar({
   onLogout
 }) {
   return (
-    <header className="sticky top-0 z-40 w-full bg-brand-green-dark text-white shadow-md">
+    <header className="sticky top-0 z-40 w-full bg-brand-green-dark text-white shadow-md gpu-accelerate">
       {/* Top Banner (Info/Promociones) */}
       <div className="bg-brand-gold text-brand-dark text-xs font-bold text-center py-1.5 px-4 tracking-wider uppercase">
         🌿 Bienvenidos a MODO MATE · Envíos a todo el país

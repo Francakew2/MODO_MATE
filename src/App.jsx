@@ -525,7 +525,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-arena/20 flex flex-col font-sans text-brand-dark">
+    <div className="min-h-screen bg-brand-arena/20 flex flex-col font-sans text-brand-dark overflow-x-hidden relative gpu-accelerate">
       {/* Navbar Global */}
       <Navbar 
         currentPage={currentPage}
@@ -615,7 +615,7 @@ function App() {
               {/* ── Franja de Beneficios (Trust Badges) ── */}
               <section className="bg-white border-b border-brand-arena py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200">
+                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200 gpu-accelerate">
                     <div className="w-10 h-10 rounded-xl bg-brand-green-light flex items-center justify-center text-brand-green-dark shrink-0">
                       <Truck className="w-5 h-5" />
                     </div>
@@ -624,7 +624,7 @@ function App() {
                       <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Por Correo Argentino a domicilio o sucursal</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200">
+                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200 gpu-accelerate">
                     <div className="w-10 h-10 rounded-xl bg-brand-green-light flex items-center justify-center text-brand-green-dark shrink-0">
                       <CreditCard className="w-5 h-5" />
                     </div>
@@ -632,7 +632,7 @@ function App() {
                       <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider">Pagos Flexibles</h4>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200">
+                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200 gpu-accelerate">
                     <div className="w-10 h-10 rounded-xl bg-brand-green-light flex items-center justify-center text-brand-green-dark shrink-0">
                       <Phone className="w-5 h-5" />
                     </div>
@@ -641,7 +641,7 @@ function App() {
                       <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Asesoramiento personalizado</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200">
+                  <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-arena/20 border border-brand-arena/50 hover:border-brand-green/30 transition-colors duration-200 gpu-accelerate">
                     <div className="w-10 h-10 rounded-xl bg-brand-green-light flex items-center justify-center text-brand-green-dark shrink-0">
                       <MapPin className="w-5 h-5" />
                     </div>

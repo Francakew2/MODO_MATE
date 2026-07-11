@@ -14,12 +14,19 @@
 :root {
   font-family: 'Inter', sans-serif;
   scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
 body {
-  overflow-x: hidden;
   width: 100%;
+}
+
+/* Fix para repintado GPU en navegadores móviles viejos (evita duplicación visual y ghosting) */
+.gpu-accelerate {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
 
 h1, h2, h3, h4, h5, h6 {
