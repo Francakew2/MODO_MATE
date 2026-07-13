@@ -75,7 +75,7 @@ export default function CartDrawer({
 
       <div className="absolute inset-y-0 right-0 max-w-full flex">
         {/* Cart Container */}
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col h-full animate-slide-in">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col h-[100dvh] md:h-full animate-slide-in">
           {/* Header */}
           <div className="px-6 py-5 bg-brand-green-dark text-white flex items-center justify-between">
             <h2 className="text-lg font-bold flex items-center gap-2">
@@ -163,7 +163,7 @@ export default function CartDrawer({
 
           {/* Cart Footer */}
           {cartItems.length > 0 && (
-            <div className="border-t border-brand-arena bg-brand-arena/20 p-6 space-y-4">
+            <div className="border-t border-brand-arena bg-brand-arena/20 p-6 space-y-4 shrink-0">
               
               {/* Shipping Calculator */}
               <div className="bg-white p-3 rounded-xl border border-brand-arena">

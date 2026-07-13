@@ -1448,6 +1448,11 @@ function App() {
         onUpdateQuantity={handleUpdateCartQuantity}
         onRemoveFromCart={handleRemoveFromCart}
         onCheckout={() => {
+          if (!user) {
+            alert('Para continuar con tu compra, por favor iniciá sesión con tu cuenta de Google.');
+            handleGoogleLogin();
+            return;
+          }
           setIsCartOpen(false);
           setIsCheckoutOpen(true);
         }}
