@@ -25,14 +25,7 @@ export default function CheckoutModal({
     zipCode: ''
   });
 
-  const [paymentMethod, setPaymentMethod] = useState('transfer'); // 'transfer' | 'card' | 'mercadopago'
-  const [cardData, setCardData] = useState({
-    number: '',
-    name: '',
-    expiry: '',
-    cvv: '',
-    installments: '1'
-  });
+  const [paymentMethod, setPaymentMethod] = useState('transfer'); // 'transfer' | 'mercadopago'
 
   const [shippingCost, setShippingCost] = useState(9900);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -100,21 +93,7 @@ export default function CheckoutModal({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCardInputChange = (e) => {
-    const { name, value } = e.target;
-    
-    let formattedValue = value;
-    if (name === 'number') {
-      formattedValue = value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim().slice(0, 19);
-    } else if (name === 'expiry') {
-      formattedValue = value.replace(/\D/g, '').replace(/(\d{2})/g, '$1/').trim().slice(0, 5);
-      if (formattedValue.endsWith('/')) formattedValue = formattedValue.slice(0, 2);
-    } else if (name === 'cvv') {
-      formattedValue = value.replace(/\D/g).slice(0, 4);
-    }
-    
-    setCardData(prev => ({ ...prev, [name]: formattedValue }));
-  };
+
 
   const handleContinueToPayment = (e) => {
     e.preventDefault();
@@ -159,12 +138,7 @@ export default function CheckoutModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (paymentMethod === 'card') {
-      if (cardData.number.replace(/\s/g, '').length < 16 || !cardData.name || cardData.expiry.length < 5 || cardData.cvv.length < 3) {
-        alert('Por favor, completa los datos de tu tarjeta correctamente.');
-        return;
-      }
-    }
+
 
     setIsProcessing(true);
 
@@ -222,13 +196,6 @@ export default function CheckoutModal({
       city: '',
       province: 'CABA',
       zipCode: ''
-    });
-    setCardData({
-      number: '',
-      name: '',
-      expiry: '',
-      cvv: '',
-      installments: '1'
     });
   };
 
@@ -759,28 +726,6 @@ export default function CheckoutModal({
                         <span className="text-xs font-bold text-brand-dark">{formatPrice(subtotal)}</span>
                       </label>
 
-                      {/* Tarjeta */}
-                      <label className={`flex items-center justify-between p-4 border cursor-pointer transition-all ${
-                        paymentMethod === 'card' 
-                          ? 'border-brand-dark bg-brand-arena/20 text-brand-dark font-bold' 
-                          : 'border-brand-arena hover:border-brand-gray text-brand-gray'
-                      }`}>
-                        <div className="flex items-center gap-3">
-                          <input 
-                            type="radio" 
-                            name="paymentMethod" 
-                            value="card" 
-                            checked={paymentMethod === 'card'} 
-                            onChange={() => setPaymentMethod('card')}
-                            className="sr-only"
-                          />
-                          <CreditCard className="w-5 h-5 shrink-0" />
-                          <div className="text-left text-xs">
-                            <p className="font-bold uppercase tracking-wider">Tarjeta de Crédito o Débito</p>
-                          </div>
-                        </div>
-                        <span className="text-xs font-bold text-brand-dark">{formatPrice(subtotal)}</span>
-                      </label>
 
                       {/* Mercado Pago */}
                       <label className={`flex items-center justify-between p-4 border cursor-pointer transition-all ${
@@ -825,75 +770,7 @@ export default function CheckoutModal({
                       </div>
                     )}
 
-                    {paymentMethod === 'card' && (
-                      <div className="space-y-4">
-                        <p className="font-bold text-brand-green-dark text-xs uppercase tracking-wider">💳 Datos de la Tarjeta</p>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="col-span-2">
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider mb-0.5">Número de Tarjeta</label>
-                            <input 
-                              type="text" 
-                              name="number"
-                              required
-                              value={cardData.number}
-                              onChange={handleCardInputChange}
-                              placeholder="4517 5683 9200 4812"
-                              className="w-full bg-white border border-brand-arena px-2.5 py-1.5 text-xs text-brand-dark focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider mb-0.5">Nombre del Titular</label>
-                            <input 
-                              type="text" 
-                              name="name"
-                              required
-                              value={cardData.name}
-                              onChange={(e) => setCardData(prev => ({ ...prev, name: e.target.value.toUpperCase() }))}
-                              placeholder="JUAN PEREZ"
-                              className="w-full bg-white border border-brand-arena px-2.5 py-1.5 text-xs text-brand-dark focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider mb-0.5">Vencimiento</label>
-                            <input 
-                              type="text" 
-                              name="expiry"
-                              required
-                              value={cardData.expiry}
-                              onChange={handleCardInputChange}
-                              placeholder="12/28"
-                              className="w-full bg-white border border-brand-arena px-2.5 py-1.5 text-xs text-brand-dark focus:outline-none focus:border-brand-green text-center"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider mb-0.5">CVV</label>
-                            <input 
-                              type="password" 
-                              name="cvv"
-                              required
-                              value={cardData.cvv}
-                              onChange={handleCardInputChange}
-                              placeholder="***"
-                              className="w-full bg-white border border-brand-arena px-2.5 py-1.5 text-xs text-brand-dark focus:outline-none focus:border-brand-green text-center"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <label className="block text-[10px] font-bold text-brand-dark uppercase tracking-wider mb-0.5">Cuotas</label>
-                            <select 
-                              name="installments" 
-                              value={cardData.installments}
-                              onChange={(e) => setCardData(prev => ({ ...prev, installments: e.target.value }))}
-                              className="w-full bg-white border border-brand-arena px-2.5 py-1.5 text-xs text-brand-dark focus:outline-none focus:border-brand-green"
-                            >
-                              <option value="1">1 pago de {formatPrice(finalTotal)}</option>
-                              <option value="3">3 cuotas de {formatPrice((finalTotal * 1.10) / 3)} (10% recargo)</option>
-                              <option value="6">6 cuotas de {formatPrice((finalTotal * 1.18) / 6)} (18% recargo)</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+
 
                     {paymentMethod === 'mercadopago' && (
                       <div className="text-xs space-y-2 text-[#009EE3]">
@@ -1031,10 +908,6 @@ export default function CheckoutModal({
                     <span>Enviar Comprobante por WhatsApp</span>
                   </a>
                 </div>
-              ) : paymentMethod === 'card' ? (
-                <p className="text-brand-dark font-medium leading-relaxed">
-                  💳 <strong>Pago Procesado:</strong> Tu pago con tarjeta de crédito/débito fue aprobado correctamente. En las próximas 24 horas hábiles despacharemos tu pedido a la dirección indicada. Te llegará el número de seguimiento por email.
-                </p>
               ) : (
                 <p className="text-brand-dark font-medium leading-relaxed">
                   ⚡ <strong>Aprobado por Mercado Pago:</strong> Tu pago fue procesado con éxito. Pronto despacharemos tu pedido y te llegará la información de rastreo.
