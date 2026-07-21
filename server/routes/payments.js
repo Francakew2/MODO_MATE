@@ -76,7 +76,7 @@ router.post('/create-preference', requireAuth, async (req, res) => {
           pending: 'https://modomate1.com.ar/'
         },
         auto_return: 'approved',
-        notification_url: 'https://modo-mate.onrender.com/api/payments/webhook' // URL en Render
+        notification_url: 'https://modo-mate-api.onrender.com/api/payments/webhook' // URL en Render
       }
     });
 

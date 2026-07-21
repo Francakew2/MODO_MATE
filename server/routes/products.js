@@ -80,7 +80,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Error al crear producto:', err);
-    res.status(500).json({ error: 'Error al crear el producto.' });
+    res.status(500).json({ error: 'Error al crear el producto.', detail: err.message });
   }
 });
 
@@ -110,7 +110,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Error al actualizar producto:', err);
-    res.status(500).json({ error: 'Error al actualizar el producto.' });
+    res.status(500).json({ error: 'Error al actualizar el producto.', detail: err.message });
   }
 });
 
@@ -126,7 +126,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     res.json({ message: 'Producto eliminado correctamente.' });
   } catch (err) {
     console.error('Error al eliminar producto:', err);
-    res.status(500).json({ error: 'Error al eliminar el producto.' });
+    res.status(500).json({ error: 'Error al eliminar el producto.', detail: err.message });
   }
 });
 

@@ -315,13 +315,15 @@ function App() {
         body: JSON.stringify(newProduct)
       });
 
-      if (!response.ok) throw new Error('Error al agregar el producto');
-
       const savedProduct = await response.json();
+      if (!response.ok) throw new Error(savedProduct.detail || savedProduct.error || 'Error al agregar el producto');
+
       setProducts([savedProduct, ...products]);
+      return true;
     } catch (err) {
       console.error(err);
       alert('Error al guardar el producto: ' + err.message);
+      return false;
     }
   };
 
@@ -336,16 +338,18 @@ function App() {
         body: JSON.stringify(updatedProduct)
       });
 
-      if (!response.ok) throw new Error('Error al actualizar el producto');
-
       const savedProduct = await response.json();
+      if (!response.ok) throw new Error(savedProduct.detail || savedProduct.error || 'Error al actualizar el producto');
+
       setProducts(products.map(p => p.id === savedProduct.id ? savedProduct : p));
       if (selectedProduct?.id === savedProduct.id) {
         setSelectedProduct(savedProduct);
       }
+      return true;
     } catch (err) {
       console.error(err);
       alert('Error al actualizar el producto: ' + err.message);
+      return false;
     }
   };
 
@@ -358,7 +362,10 @@ function App() {
         }
       });
 
-      if (!response.ok) throw new Error('Error al eliminar el producto');
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.detail || body.error || 'Error al eliminar el producto');
+      }
 
       setProducts(products.filter(p => p.id !== productId));
       setCartItems(cartItems.filter(item => item.id !== productId));

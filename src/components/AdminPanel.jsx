@@ -121,7 +121,7 @@ export default function AdminPanel({
   };
 
   // Submit Product Form
-  const handleSubmitProduct = (e) => {
+  const handleSubmitProduct = async (e) => {
     e.preventDefault();
     if (!productForm.name || !productForm.price || productForm.stock === '') {
       alert('Por favor, completa los campos requeridos (Nombre, Precio y Stock).');
@@ -166,15 +166,17 @@ export default function AdminPanel({
       details: parsedDetails
     };
 
+    let success;
     if (editingProduct) {
-      onUpdateProduct({ ...editingProduct, ...itemData });
-      alert('Producto actualizado con éxito.');
+      success = await onUpdateProduct({ ...editingProduct, ...itemData });
     } else {
       const newId = productForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      onAddProduct({ ...itemData, id: `${newId}-${Date.now().toString().slice(-4)}` });
-      alert('Producto creado con éxito.');
+      success = await onAddProduct({ ...itemData, id: `${newId}-${Date.now().toString().slice(-4)}` });
     }
 
+    if (!success) return;
+
+    alert(editingProduct ? 'Producto actualizado con éxito.' : 'Producto creado con éxito.');
     setIsFormOpen(false);
     setEditingProduct(null);
   };

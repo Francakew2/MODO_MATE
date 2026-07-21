@@ -5,6 +5,11 @@ require('dotenv').config();
 
 const app = express();
 
+// Render (y la mayoría de los hosts) corren detrás de un proxy inverso.
+// Sin esto, Express no puede identificar la IP real de cada visitante y
+// el rate limiter termina agrupando a TODOS los usuarios bajo la misma IP.
+app.set('trust proxy', 1);
+
 const allowedOrigins = [
   'http://localhost:5173', // Entorno de desarrollo local
   'https://modo-mate.pages.dev', // URL del hosting definitivo en Cloudflare
@@ -29,10 +34,13 @@ app.use(cors({
 app.use(express.json());
 
 // Rate Limiter para proteger contra ataques de denegación de servicio (DDoS)
+// Las lecturas públicas (GET) no cuentan: no tiene sentido limitar la
+// navegación del catálogo con el mismo balde que las escrituras de admin.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Límite de 100 solicitudes por IP
-  message: { error: 'Demasiadas solicitudes desde esta IP, por favor intenta nuevamente más tarde.' }
+  max: 300, // Límite de 300 solicitudes de escritura por IP
+  message: { error: 'Demasiadas solicitudes desde esta IP, por favor intenta nuevamente más tarde.' },
+  skip: (req) => req.method === 'GET'
 });
 
 app.use(limiter);
