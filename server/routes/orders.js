@@ -142,6 +142,75 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
+// 3b. Registrar una venta hecha en el local físico (Solo Admin)
+router.post('/local-sale', requireAuth, requireAdmin, async (req, res) => {
+  const { items, payment_method } = req.body;
+
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: 'Agregá al menos un producto a la venta.' });
+  }
+
+  try {
+    const { data: dbProducts, error: dbError } = await supabase
+      .from('products')
+      .select('id, name, price, stock')
+      .in('id', items.map(i => i.id));
+
+    if (dbError) throw dbError;
+
+    const productMap = {};
+    dbProducts.forEach(p => { productMap[p.id] = p; });
+
+    let subtotal = 0;
+    for (const item of items) {
+      const product = productMap[item.id];
+      if (!product) {
+        return res.status(400).json({ error: `Un producto de la venta ya no existe en el catálogo.` });
+      }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ error: `Stock insuficiente para ${product.name}. Disponibles: ${product.stock}` });
+      }
+      subtotal += parseFloat(product.price) * item.quantity;
+    }
+
+    const orderItems = items.map(item => ({
+      id: item.id,
+      name: productMap[item.id].name,
+      price: parseFloat(productMap[item.id].price),
+      quantity: item.quantity
+    }));
+
+    const { data: newOrder, error: orderError } = await supabase
+      .from('orders')
+      .insert([{
+        user_id: req.user.id,
+        customer_name: 'Venta en Local',
+        items: orderItems,
+        subtotal,
+        shipping_cost: 0,
+        total: subtotal,
+        payment_method: payment_method || 'Efectivo (Local)',
+        payment_status: 'approved',
+        status: 'Completado'
+      }])
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Descontar stock inmediatamente, ya que la venta ya se concreto en el local
+    for (const item of orderItems) {
+      const newStock = Math.max(0, productMap[item.id].stock - item.quantity);
+      await supabase.from('products').update({ stock: newStock }).eq('id', item.id);
+    }
+
+    res.status(201).json(newOrder);
+  } catch (err) {
+    console.error('Error al registrar venta de local:', err);
+    res.status(500).json({ error: err.message || 'Error al registrar la venta.' });
+  }
+});
+
 // 4. Actualizar el estado de un pedido (Solo Admin)
 router.put('/:id/status', requireAuth, requireAdmin, async (req, res) => {
   const { status } = req.body;

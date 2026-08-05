@@ -40,7 +40,7 @@ export default function Navbar({
         </div>
 
         {/* Search Bar (Solo visible en la página de Productos, tab shop) */}
-        {currentPage === 'productos' && currentTab === 'shop' && (
+        {userRole !== 'admin' && currentPage === 'productos' && currentTab === 'shop' && (
           <div className="flex-1 max-w-md relative hidden md:block">
             <input
               type="text"
@@ -55,44 +55,46 @@ export default function Navbar({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Navegación Principal: Inicio */}
-          <button
-            onClick={() => { setCurrentPage('home'); setCurrentTab('shop'); }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
-              currentPage === 'home' 
-                ? 'bg-white/20 text-brand-gold shadow-sm' 
-                : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
-            }`}
-          >
-            <Home className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Inicio</span>
-          </button>
+          {/* Navegación Principal: oculta por completo en modo admin, solo existe el Panel Admin */}
+          {userRole !== 'admin' && (
+            <>
+              <button
+                onClick={() => { setCurrentPage('home'); setCurrentTab('shop'); }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
+                  currentPage === 'home'
+                    ? 'bg-white/20 text-brand-gold shadow-sm'
+                    : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
+                }`}
+              >
+                <Home className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Inicio</span>
+              </button>
 
-          {/* Navegación Principal: Productos */}
-          <button
-            onClick={() => { setCurrentPage('productos'); setCurrentTab('shop'); }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
-              currentPage === 'productos' && currentTab !== 'admin'
-                ? 'bg-white/20 text-brand-gold shadow-sm' 
-                : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
-            }`}
-          >
-            <Store className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Productos</span>
-          </button>
+              <button
+                onClick={() => { setCurrentPage('productos'); setCurrentTab('shop'); }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
+                  currentPage === 'productos'
+                    ? 'bg-white/20 text-brand-gold shadow-sm'
+                    : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
+                }`}
+              >
+                <Store className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Productos</span>
+              </button>
 
-          {/* Navegación Principal: Contacto */}
-          <button
-            onClick={() => { setCurrentPage('contacto'); setCurrentTab('shop'); }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
-              currentPage === 'contacto' 
-                ? 'bg-white/20 text-brand-gold shadow-sm' 
-                : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
-            }`}
-          >
-            <User className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Contacto</span>
-          </button>
+              <button
+                onClick={() => { setCurrentPage('contacto'); setCurrentTab('shop'); }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-black uppercase tracking-wider transition-all duration-200 ${
+                  currentPage === 'contacto'
+                    ? 'bg-white/20 text-brand-gold shadow-sm'
+                    : 'text-white/90 hover:text-brand-gold hover:bg-white/5'
+                }`}
+              >
+                <User className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Contacto</span>
+              </button>
+            </>
+          )}
 
           {/* Autenticación Real de Supabase */}
           {!user ? (
@@ -106,19 +108,12 @@ export default function Navbar({
             </button>
           ) : (
             <div className="flex items-center gap-2">
-              {/* Si es Admin, mostrar el botón de acceso al panel */}
+              {/* En modo admin no hay nada a lo que "volver": esta es la unica vista */}
               {userRole === 'admin' && (
-                <button
-                  onClick={() => { setCurrentPage('productos'); setCurrentTab('admin'); }}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
-                    currentTab === 'admin'
-                      ? 'bg-amber-500 text-brand-dark'
-                      : 'bg-white/10 text-brand-gold hover:bg-white/20'
-                  }`}
-                >
+                <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-amber-500 text-brand-dark">
                   <ShieldAlert className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">Panel Admin</span>
-                </button>
+                </span>
               )}
 
               {/* Botón de Logout o Avatar */}
@@ -154,24 +149,26 @@ export default function Navbar({
             </div>
           )}
 
-          {/* Cart Icon Button */}
-          <button
-            onClick={onOpenCart}
-            className="relative p-2 rounded-full hover:bg-white/10 text-white transition-colors"
-            aria-label="Abrir carrito de compras"
-          >
-            <ShoppingCart className="w-6 h-6" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-brand-gold text-brand-dark text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-brand-green-dark animate-bounce">
-                {cartCount}
-              </span>
-            )}
-          </button>
+          {/* Cart Icon Button (no aplica en modo admin) */}
+          {userRole !== 'admin' && (
+            <button
+              onClick={onOpenCart}
+              className="relative p-2 rounded-full hover:bg-white/10 text-white transition-colors"
+              aria-label="Abrir carrito de compras"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-brand-gold text-brand-dark text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-brand-green-dark animate-bounce">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile Search Bar (Only shown on productos page, shop tab, and small screens) */}
-      {currentPage === 'productos' && currentTab === 'shop' && (
+      {userRole !== 'admin' && currentPage === 'productos' && currentTab === 'shop' && (
         <div className="px-4 pb-3 md:hidden">
           <div className="relative">
             <input

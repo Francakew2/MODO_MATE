@@ -13,7 +13,8 @@ import {
   CheckCircle,
   Clock,
   Truck,
-  XCircle
+  XCircle,
+  Search
 } from 'lucide-react';
 
 export default function AdminPanel({ 
@@ -24,14 +25,23 @@ export default function AdminPanel({
   onDeleteProduct,
   onUpdateOrderStatus,
   onUploadImage,
-  onDeleteOrder
+  onDeleteOrder,
+  onRegisterSale
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('dashboard'); // 'dashboard', 'catalog', 'orders'
+  const [activeSubTab, setActiveSubTab] = useState('dashboard'); // 'dashboard', 'catalog', 'orders', 'sales'
   const [editingProduct, setEditingProduct] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  
+  const [catalogSearch, setCatalogSearch] = useState('');
+
+  // Venta en Local
+  const [saleCart, setSaleCart] = useState([]);
+  const [saleProductId, setSaleProductId] = useState('');
+  const [saleQuantity, setSaleQuantity] = useState('1');
+  const [salePaymentMethod, setSalePaymentMethod] = useState('Efectivo');
+  const [isSubmittingSale, setIsSubmittingSale] = useState(false);
+
   const [productForm, setProductForm] = useState({
     name: '',
     price: '',
@@ -187,6 +197,57 @@ export default function AdminPanel({
     }
   };
 
+  // --- Venta en Local ---
+  const handleAddToSaleCart = () => {
+    const product = products.find(p => p.id === saleProductId);
+    const qty = parseInt(saleQuantity);
+
+    if (!product) {
+      alert('Elegí un producto.');
+      return;
+    }
+    if (isNaN(qty) || qty <= 0) {
+      alert('La cantidad debe ser mayor a 0.');
+      return;
+    }
+
+    const alreadyInCart = saleCart.find(i => i.id === product.id)?.quantity || 0;
+    if (qty + alreadyInCart > product.stock) {
+      alert(`Stock insuficiente. Disponible: ${product.stock - alreadyInCart}.`);
+      return;
+    }
+
+    setSaleCart(prev => {
+      const existing = prev.find(i => i.id === product.id);
+      if (existing) {
+        return prev.map(i => i.id === product.id ? { ...i, quantity: i.quantity + qty } : i);
+      }
+      return [...prev, { id: product.id, name: product.name, price: product.price, quantity: qty }];
+    });
+    setSaleProductId('');
+    setSaleQuantity('1');
+  };
+
+  const handleRemoveFromSaleCart = (id) => {
+    setSaleCart(prev => prev.filter(i => i.id !== id));
+  };
+
+  const saleTotal = saleCart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  const handleSubmitSale = async () => {
+    if (saleCart.length === 0) return;
+    setIsSubmittingSale(true);
+    const success = await onRegisterSale(
+      saleCart.map(i => ({ id: i.id, quantity: i.quantity })),
+      salePaymentMethod
+    );
+    setIsSubmittingSale(false);
+    if (success) {
+      alert('Venta registrada con éxito.');
+      setSaleCart([]);
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Pendiente': return <Clock className="w-4 h-4 text-amber-500" />;
@@ -259,6 +320,18 @@ export default function AdminPanel({
                 {orders.filter(o => o.status === 'Pendiente').length}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => { setActiveSubTab('sales'); setIsFormOpen(false); }}
+            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-3 ${
+              activeSubTab === 'sales'
+                ? 'bg-brand-green-dark text-white shadow-md'
+                : 'text-brand-dark hover:bg-brand-arena/50'
+            }`}
+          >
+            <DollarSign className="w-4 h-4" />
+            <span>Venta en Local</span>
           </button>
         </nav>
       </aside>
@@ -357,6 +430,18 @@ export default function AdminPanel({
                 <h2 className="text-xl font-black text-brand-dark">Catálogo de Productos</h2>
                 <p className="text-xs text-brand-gray">Crear, actualizar y eliminar productos del e-commerce.</p>
               </div>
+              {!isFormOpen && (
+                <div className="relative flex-1 max-w-xs">
+                  <input
+                    type="text"
+                    value={catalogSearch}
+                    onChange={(e) => setCatalogSearch(e.target.value)}
+                    placeholder="Buscar producto por nombre..."
+                    className="w-full bg-white border border-brand-arena rounded-xl pl-9 pr-3 py-2.5 text-xs focus:outline-none focus:border-brand-green"
+                  />
+                  <Search className="absolute left-3 top-3 w-3.5 h-3.5 text-brand-gray pointer-events-none" />
+                </div>
+              )}
               {!isFormOpen && (
                 <button
                   onClick={handleOpenCreate}
@@ -562,7 +647,9 @@ export default function AdminPanel({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-arena">
-                  {products.map(product => (
+                  {products
+                    .filter(product => product.name.toLowerCase().includes(catalogSearch.trim().toLowerCase()))
+                    .map(product => (
                     <tr key={product.id} className="hover:bg-brand-arena/10">
                       <td className="p-3 flex items-center gap-3">
                         <img 
@@ -759,7 +846,99 @@ export default function AdminPanel({
                 </div>
               </div>
             )}
-            
+
+          </div>
+        )}
+
+        {/* SUBTAB: VENTA EN LOCAL */}
+        {activeSubTab === 'sales' && (
+          <div className="space-y-6 animate-fade-in max-w-2xl">
+            <div>
+              <h2 className="text-xl font-black text-brand-dark">Registrar Venta en Local</h2>
+              <p className="text-xs text-brand-gray">Cargá una venta hecha en el mostrador: descuenta el stock al instante.</p>
+            </div>
+
+            <div className="bg-brand-arena/15 rounded-2xl border border-brand-arena p-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3 items-end">
+                <div>
+                  <label className="block font-semibold text-brand-dark mb-1 text-xs">Producto</label>
+                  <select
+                    value={saleProductId}
+                    onChange={(e) => setSaleProductId(e.target.value)}
+                    className="w-full bg-white border border-brand-arena rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:border-brand-green"
+                  >
+                    <option value="">Seleccionar producto...</option>
+                    {products.map(p => (
+                      <option key={p.id} value={p.id} disabled={p.stock <= 0}>
+                        {p.name} — {formatPrice(p.price)} ({p.stock} u. disp.)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-brand-dark mb-1 text-xs">Cant.</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={saleQuantity}
+                    onChange={(e) => setSaleQuantity(e.target.value)}
+                    className="w-20 bg-white border border-brand-arena rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:border-brand-green"
+                  />
+                </div>
+                <button
+                  onClick={handleAddToSaleCart}
+                  className="bg-brand-green hover:bg-brand-green-dark text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Agregar
+                </button>
+              </div>
+
+              {saleCart.length > 0 && (
+                <div className="border border-brand-arena rounded-xl divide-y divide-brand-arena overflow-hidden">
+                  {saleCart.map(item => (
+                    <div key={item.id} className="p-2.5 flex justify-between items-center bg-white text-xs">
+                      <div>
+                        <p className="font-bold text-brand-dark">{item.name}</p>
+                        <p className="text-[10px] text-brand-gray">Cant: {item.quantity} x {formatPrice(item.price)}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-brand-dark">{formatPrice(item.price * item.quantity)}</span>
+                        <button onClick={() => handleRemoveFromSaleCart(item.id)} className="text-red-500 hover:text-red-700">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="p-2.5 flex justify-between bg-brand-arena/10 font-bold text-xs">
+                    <span>Total:</span>
+                    <span className="text-brand-green-dark text-sm">{formatPrice(saleTotal)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block font-semibold text-brand-dark mb-1 text-xs">Medio de pago</label>
+                <select
+                  value={salePaymentMethod}
+                  onChange={(e) => setSalePaymentMethod(e.target.value)}
+                  className="w-full sm:w-52 bg-white border border-brand-arena rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:border-brand-green"
+                >
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                  <option value="Tarjeta de Crédito/Débito">Tarjeta de Crédito/Débito</option>
+                  <option value="Mercado Pago">Mercado Pago (QR/Link en el local)</option>
+                </select>
+              </div>
+
+              <button
+                onClick={handleSubmitSale}
+                disabled={saleCart.length === 0 || isSubmittingSale}
+                className="w-full bg-brand-green hover:bg-brand-green-dark disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-center text-sm"
+              >
+                {isSubmittingSale ? 'Registrando...' : 'Registrar Venta'}
+              </button>
+            </div>
           </div>
         )}
 

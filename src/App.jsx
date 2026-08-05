@@ -379,6 +379,34 @@ function App() {
     }
   };
 
+  // --- Handler para registrar una venta hecha en el local físico ---
+  const handleRegisterSale = async (items, paymentMethod) => {
+    try {
+      const response = await fetch(`${API_URL}/api/orders/local-sale`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ items, payment_method: paymentMethod })
+      });
+
+      const newOrder = await response.json();
+      if (!response.ok) throw new Error(newOrder.detail || newOrder.error || 'Error al registrar la venta');
+
+      setOrders([newOrder, ...orders]);
+      setProducts(products.map(p => {
+        const sold = items.find(i => i.id === p.id);
+        return sold ? { ...p, stock: Math.max(0, p.stock - sold.quantity) } : p;
+      }));
+      return true;
+    } catch (err) {
+      console.error(err);
+      alert('Error al registrar la venta: ' + err.message);
+      return false;
+    }
+  };
+
   // --- Handler para subir imágenes a Supabase Storage ---
   const handleImageUpload = async (file) => {
     try {
@@ -488,6 +516,10 @@ function App() {
     }
     
     return matchesCategory && matchesSearch && matchesSubCategory;
+  }).sort((a, b) => {
+    // Orden alfabetico para todas las categorias excepto Mates, que ya se organiza por subcategoria
+    if (a.category === 'Mates' || b.category === 'Mates') return 0;
+    return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
   });
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -560,6 +592,7 @@ function App() {
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onUploadImage={handleImageUpload}
           onDeleteOrder={handleDeleteOrder}
+          onRegisterSale={handleRegisterSale}
         />
       ) : (
         /* RUTA: VISTA CLIENTE */
@@ -653,8 +686,8 @@ function App() {
                       <MapPin className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider">Local en San Cristóbal</h4>
-                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Bv. San Martín 1121, Santa Fe</p>
+                      <h4 className="text-xs font-bold text-brand-dark uppercase tracking-wider">Local</h4>
+                      <p className="text-[10px] text-brand-gray font-semibold mt-0.5">Bv. San Martín 1121, San Cristóbal - Santa Fe</p>
                     </div>
                   </div>
                 </div>
