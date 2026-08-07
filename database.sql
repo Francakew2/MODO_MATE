@@ -19,13 +19,23 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de RLS para profiles
-CREATE POLICY "Permitir lectura pública de perfiles" 
-  ON public.profiles FOR SELECT 
-  USING (true);
-
-CREATE POLICY "Permitir a usuarios actualizar su propio perfil" 
-  ON public.profiles FOR UPDATE 
+-- Cada usuario ve únicamente su propio perfil. NO usar USING (true) acá: eso
+-- expondría nombre, email, teléfono y dirección de todos los usuarios (y qué
+-- cuentas son admin) a cualquiera que tenga la anon key, que es pública.
+CREATE POLICY "Ver únicamente el propio perfil"
+  ON public.profiles FOR SELECT
   USING (auth.uid() = id);
+
+CREATE POLICY "Permitir a usuarios actualizar su propio perfil"
+  ON public.profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+-- IMPORTANTE: la política de UPDATE de arriba no limita QUÉ columnas se pueden
+-- modificar, así que por sí sola permitiría que un usuario se ponga role='admin'.
+-- Estos permisos a nivel de columna son los que realmente lo impiden.
+REVOKE UPDATE ON public.profiles FROM authenticated, anon;
+GRANT UPDATE (full_name, phone, address, city, zip_code, avatar_url)
+  ON public.profiles TO authenticated;
 
 -- Crear perfil automáticamente cuando un usuario se registra en Supabase Auth
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -109,11 +119,13 @@ CREATE POLICY "Permitir a usuarios ver sus propios pedidos"
   ON public.orders FOR SELECT 
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Permitir creación de pedidos a cualquier usuario autenticado" 
-  ON public.orders FOR INSERT 
-  WITH CHECK (auth.uid() = user_id);
+-- NO agregar una política de INSERT para usuarios acá. Los pedidos se crean
+-- exclusivamente desde POST /api/orders, que calcula los precios contra la
+-- tabla products. Si se permite el INSERT directo, un usuario puede armar un
+-- pedido con precios inventados (ej: un producto de $6.000 puesto a $1) y
+-- pagar ese monto. El backend usa service_role, así que ignora RLS y funciona.
 
-CREATE POLICY "Permitir a los administradores ver todos los pedidos" 
+CREATE POLICY "Permitir a los administradores ver todos los pedidos"
   ON public.orders FOR ALL 
   USING (
     EXISTS (

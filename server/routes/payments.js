@@ -40,15 +40,58 @@ router.post('/create-preference', requireAuth, async (req, res) => {
     }
 
     const preference = new Preference(client);
-    
-    // Mapear los productos a items de Mercado Pago
-    const items = order.items.map(item => ({
-      id: item.id,
-      title: item.name,
-      quantity: item.quantity,
-      unit_price: parseFloat(item.price),
-      currency_id: 'ARS'
-    }));
+
+    // Revalidar precios contra la base de datos antes de cobrar.
+    // Nunca confiar en los precios guardados en el pedido: si alguien creó el
+    // pedido por fuera del flujo normal, podría haber puesto precios falsos.
+    const orderItems = Array.isArray(order.items) ? order.items : [];
+    if (orderItems.length === 0) {
+      return res.status(400).json({ error: 'El pedido no tiene productos.' });
+    }
+
+    const { data: dbProducts, error: productsError } = await supabase
+      .from('products')
+      .select('id, name, price')
+      .in('id', orderItems.map(i => i.id));
+
+    if (productsError) throw productsError;
+
+    const priceMap = {};
+    dbProducts.forEach(p => { priceMap[p.id] = { name: p.name, price: parseFloat(p.price) }; });
+
+    let realSubtotal = 0;
+    const items = [];
+
+    for (const item of orderItems) {
+      const real = priceMap[item.id];
+      if (!real) {
+        return res.status(400).json({ error: `El producto "${item.name}" ya no está disponible en el catálogo.` });
+      }
+
+      const quantity = parseInt(item.quantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        return res.status(400).json({ error: 'La cantidad de un producto del pedido no es válida.' });
+      }
+
+      realSubtotal += real.price * quantity;
+      items.push({
+        id: item.id,
+        title: real.name,
+        quantity,
+        unit_price: real.price, // precio real de la base, no el que vino en el pedido
+        currency_id: 'ARS'
+      });
+    }
+
+    const realTotal = realSubtotal + (parseFloat(order.shipping_cost) || 0);
+
+    // Si el total guardado no coincide con el real, el pedido no es confiable.
+    if (Math.abs(realTotal - parseFloat(order.total)) > 0.01) {
+      console.warn(`[SEGURIDAD] Pedido ${order.id}: total guardado $${order.total} vs total real $${realTotal}`);
+      return res.status(400).json({
+        error: 'Los precios del pedido no coinciden con el catálogo actual. Por favor, volvé a armar tu compra.'
+      });
+    }
 
     // Si hay costo de envío, lo agregamos como un item virtual de cobro
     if (order.shipping_cost > 0) {
@@ -177,8 +220,9 @@ router.post('/webhook', async (req, res) => {
     // Responder siempre 200 o 201 a Mercado Pago para avisar que recibimos el webhook correctamente
     res.sendStatus(200);
   } catch (err) {
+    // No exponer el detalle interno del error a quien llame al webhook
     console.error('Error al procesar webhook de Mercado Pago:', err.message);
-    res.status(500).json({ error: err.message });
+    res.sendStatus(500);
   }
 });
 
