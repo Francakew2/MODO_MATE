@@ -401,11 +401,22 @@ export default function AdminPanel({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-brand-arena">
-                      {orders.slice(-5).reverse().map(order => (
+                      {/* La API ya devuelve los pedidos del más nuevo al más viejo */}
+                      {orders.slice(0, 5).map(order => (
                         <tr key={order.id} className="hover:bg-brand-arena/10">
-                          <td className="p-3 font-bold font-mono text-brand-green-dark">{order.id}</td>
-                          <td className="p-3 font-medium">{order.customer}</td>
-                          <td className="p-3 text-brand-gray">{order.date}</td>
+                          <td className="p-3 font-bold font-mono text-brand-green-dark" title={order.id}>
+                            {order.id.slice(0, 8)}...
+                          </td>
+                          <td className="p-3 font-medium">{order.customer_name || order.customer}</td>
+                          <td className="p-3 text-brand-gray">
+                            {order.created_at ? new Date(order.created_at).toLocaleDateString('es-AR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }) : order.date}
+                          </td>
                           <td className="p-3 font-bold">{formatPrice(order.total)}</td>
                           <td className="p-3">
                             <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${getStatusClass(order.status)}`}>
