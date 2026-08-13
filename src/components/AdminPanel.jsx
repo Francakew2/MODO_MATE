@@ -529,6 +529,7 @@ export default function AdminPanel({
                       <option value="Yerbas">Yerbas</option>
                       <option value="Hierbas">Hierbas</option>
                       <option value="Accesorios">Accesorios</option>
+                      <option value="Bombillas y Bombillones">Bombillas y Bombillones</option>
                     </select>
                   </div>
 

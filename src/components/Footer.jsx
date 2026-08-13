@@ -52,7 +52,7 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
         <div>
           <h3 className="text-sm font-bold uppercase tracking-wider text-brand-gold mb-4">Categorías</h3>
           <ul className="space-y-2.5 text-sm text-brand-gray">
-            {['Mates', 'Termos', 'Yerbas', 'Hierbas', 'Accesorios'].map((cat) => (
+            {['Mates', 'Termos', 'Yerbas', 'Hierbas', 'Accesorios', 'Bombillas y Bombillones'].map((cat) => (
               <li key={cat}>
                 <button 
                   onClick={() => { if (setCurrentPage) setCurrentPage('productos'); setCurrentTab('shop'); }} 

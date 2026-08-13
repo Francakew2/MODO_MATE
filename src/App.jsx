@@ -1023,15 +1023,24 @@ function App() {
                       },
                       { name: 'Yerbas', icon: <Leaf className="w-5 h-5" /> },
                       { name: 'Hierbas', icon: <Sprout className="w-5 h-5" /> },
-                      { 
-                        name: 'Accesorios', 
+                      {
+                        name: 'Accesorios',
                         icon: (
                           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                             <path d="M12 8v5" />
                             <circle cx="12" cy="15" r="1" />
                           </svg>
-                        ) 
+                        )
+                      },
+                      {
+                        name: 'Bombillas y Bombillones',
+                        icon: (
+                          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 18L17 5" />
+                            <ellipse cx="6" cy="18" rx="2.3" ry="1.4" transform="rotate(-40 6 18)" />
+                          </svg>
+                        )
                       }
                     ].map((cat) => (
                       <button
