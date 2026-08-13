@@ -63,12 +63,21 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios (nombre, precio, categoría).' });
   }
 
+  const priceNum = Number(price);
+  const stockNum = stock === undefined ? 0 : Number(stock);
+  if (isNaN(priceNum) || priceNum <= 0) {
+    return res.status(400).json({ error: 'El precio debe ser un número positivo.' });
+  }
+  if (isNaN(stockNum) || stockNum < 0) {
+    return res.status(400).json({ error: 'El stock no puede ser negativo.' });
+  }
+
   const finalImageUrl = image || image_url || 'https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?auto=format&fit=crop&w=600&q=80';
 
   try {
     const { data: newProduct, error } = await supabase
       .from('products')
-      .insert([{ name, description, price, category, image_url: finalImageUrl, stock, details }])
+      .insert([{ name, description, price: priceNum, category, image_url: finalImageUrl, stock: stockNum, details }])
       .select()
       .single();
 
@@ -88,6 +97,19 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   const { name, description, price, category, image, image_url, stock, details } = req.body;
   const finalImageUrl = image || image_url;
+
+  if (price !== undefined) {
+    const priceNum = Number(price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      return res.status(400).json({ error: 'El precio debe ser un número positivo.' });
+    }
+  }
+  if (stock !== undefined) {
+    const stockNum = Number(stock);
+    if (isNaN(stockNum) || stockNum < 0) {
+      return res.status(400).json({ error: 'El stock no puede ser negativo.' });
+    }
+  }
 
   try {
     const updateData = { name, description, price, category, stock, details };

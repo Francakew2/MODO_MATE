@@ -211,7 +211,7 @@ router.post('/webhook', async (req, res) => {
               `Ingresá al panel administrativo para armar el pedido. ✨`
             );
             const waLink = `https://api.whatsapp.com/send?phone=${adminPhone}&text=${messageText}`;
-            console.log(`[ALERT] Notificación WhatsApp: ${waLink}`);
+            console.log(`[ALERT] Nuevo pedido pagado #${orderId.slice(0, 8)}`);
           }
         }
       }
