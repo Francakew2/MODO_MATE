@@ -45,6 +45,15 @@ Se hizo una auditoría a fondo probando ataques reales con usuarios descartables
 - Después de cada push a `main`, chequear el check de "Workers Builds: modo-mate" en `github.com/Francakew2/MODO_MATE/commits/main` (o el historial de compilaciones en el dashboard de Cloudflare). Si dice "0/1", el frontend NO se actualizó aunque el push haya funcionado.
 - El redirect `www.modomate1.com.ar` → `modomate1.com.ar` **NO va en `public/_redirects`** (ese archivo solo sirve para rutas relativas dentro del mismo host). Está resuelto con una **Redirect Rule a nivel de zona** en el dashboard de Cloudflare (Reglas → Reglas de redireccionamiento → plantilla "Redirigir de WWW a raíz"). `www` está enrutado como Worker route/custom domain (no un DNS A/CNAME normal), por eso al crearla Cloudflare avisa "es posible que no aplique" — igual funciona, se verificó con `curl -I` (301 real).
 - Para el backend (Render), el equivalente es chequear `https://modo-mate-api.onrender.com/health` y, si hace falta más detalle, el log de deploy en el dashboard de Render.
+- Render es un pipeline de deploy **independiente** de Cloudflare (auto-deploy propio en cada push a `main` que toque `server/`) — el incidente del `_redirects` roto arriba **no** lo afectó. Verificado a mano el 2026-08-13 contra el dashboard de Render: los 3 commits de seguridad (`8e3341c`, `41bd49d`, etc.) quedaron "Live" en Render entre 12 y 28 segundos después de cada push, sin ningún gap. Igual, no asumir esto para siempre — confirmar en el dashboard si hay dudas.
+
+## MCP de Supabase en Claude Code
+
+Hay un servidor MCP de Supabase agregado a nivel de proyecto (`.mcp.json`, scope `project`) apuntando al proyecto real `ldoktrojrlecpxcumqap` (agregado el 2026-08-13, todavía sin autenticar al momento de escribir esto). Para autenticarlo: `claude /mcp` en una terminal normal (no funciona en una sesión no interactiva) → elegir `supabase` → Authenticate.
+
+**Gotcha:** Fran tiene otras cuentas/organizaciones de Supabase conectadas en el mismo navegador (proyectos de otros clientes, ej. `adriana-jabones`, `club-ferro-dho-test`). Si el flujo OAuth tira "Organization unavailable — Your account is not a member of the pre-selected organization", es porque el navegador tiene activa la sesión de la cuenta/org equivocada. Solución: loguearse en supabase.com con `franciscochaulet011@gmail.com` (la cuenta dueña de `ldoktrojrlecpxcumqap`) antes de autenticar, o usar una ventana de incógnito.
+
+Además, los servidores MCP se cargan al arrancar la sesión de Claude Code — si se agrega/autentica un servidor a mitad de una conversación ya abierta, esa conversación no lo va a ver. Hace falta abrir una sesión nueva.
 
 ## Convenciones del código
 
