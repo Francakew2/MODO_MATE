@@ -131,6 +131,16 @@ export default function Footer({ setCurrentTab, setCurrentPage }) {
             <span className="bg-white/5 px-2 py-1 rounded border border-white/5">Tarjetas Crédito/Débito</span>
           </div>
         </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 pt-4 border-t border-white/5 text-center">
+          <a
+            href="https://www.instagram.com/fraan.chaulet/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[11px] text-brand-gray hover:text-brand-gold transition-colors"
+          >
+            Creado por Francisco Chaulet
+          </a>
+        </div>
       </div>
     </footer>
   );
