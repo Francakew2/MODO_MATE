@@ -1136,10 +1136,10 @@ function App() {
               <div className="bg-white rounded-3xl border border-brand-arena overflow-hidden flex flex-col md:flex-row gap-8 p-6 md:p-8 shadow-xs">
                 {/* Left: Product Image */}
                 <div className="w-full md:w-1/2 aspect-square rounded-2xl overflow-hidden bg-brand-arena border border-brand-arena shrink-0">
-                  <img 
-                    src={selectedProduct.image} 
-                    alt={selectedProduct.name} 
-                    className="w-full h-full object-cover"
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
